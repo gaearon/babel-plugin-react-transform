@@ -1,0 +1,35 @@
+{
+  "name": "babel-plugin-react-transform",
+  "version": "1.0.0",
+  "description": "Babel plugin to instrument React components with custom transforms",
+  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaearon/babel-plugin-react-transform.git"
+  },
+  "author": "Dan Abramov <dan.abramov@me.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gaearon/babel-plugin-react-transform/issues"
+  },
+  "homepage": "https://github.com/gaearon/babel-plugin-react-transform#readme",
+  "devDependencies": {
+    "babel": "^5.8.23",
+    "mocha": "^2.2.5"
+  },
+  "scripts": {
+    "build": "babel-plugin build",
+    "test": "mocha --compilers js:babel/register",
+    "test:watch": "npm run test -- --watch",
+    "prepublish": "npm run build"
+  },
+  "keywords": [
+    "babel-plugin",
+    "react-transform",
+    "instrumentation",
+    "dx",
+    "react",
+    "reactjs",
+    "components"
+  ]
+}
