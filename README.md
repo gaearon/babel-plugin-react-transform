@@ -14,6 +14,8 @@ Such transforms can do a variety of things:
 The limit is your imagination and the time you feel compelled to spend on writing these transforms.  
 Time will show whether it is an amazing, or a terrible idea.
 
+[![react-transform channel on slack](https://img.shields.io/badge/slack-react--transform%40reactiflux-61DAFB.svg?style=flat-square)](http://www.reactiflux.com)
+
 ## Demo
 
 Check out **[react-transform-boilerplate](https://github.com/gaearon/react-transform-boilerplate)** for a demo showing a combination of transforms.
@@ -189,6 +191,10 @@ Don’t forget to tag it with `react-transform` keyword on npm.
 ## Limitations
 
 Currently, it can only locate components of two types: ES6 classes with `render` method and explicit `React.createClass()` calls. I’m open to adding more heuristics for other common patterns, given enough interest.
+
+## Discussion
+
+You can discuss React Transform and related projects in **#react-transform** channel on [Reactiflux Slack](http://reactiflux.com).
 
 ## Patrons
 
