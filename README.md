@@ -186,6 +186,10 @@ Don’t forget to tag it with `react-transform` keyword on npm.
 * **https://github.com/alexkuz/react-transform-debug-inspector**
 * Feeling inspired? Send a PR!
 
+## Limitations
+
+Currently, it can only locate components of two types: ES6 classes with `render` method and explicit `React.createClass()` calls. I’m open to adding more heuristics for other common patterns, given enough interest.
+
 ## License
 
 MIT
