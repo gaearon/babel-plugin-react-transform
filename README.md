@@ -192,8 +192,7 @@ Currently, it can only locate components of two types: ES6 classes with `render`
 
 ## Patrons
 
-The work on React Transform, [React Hot Loader](https://github.com/gaearon/react-hot-loader), [Redux](https://github.com/rackt/redux), and related projects was [funded by the community](https://www.patreon.com/reactdx).  
-Meet some of the outstanding companies that made it possible:
+The work on React Transform, [React Hot Loader](https://github.com/gaearon/react-hot-loader), [Redux](https://github.com/rackt/redux), and related projects was [funded by the community](https://www.patreon.com/reactdx). Meet some of the outstanding companies that made it possible:
 
 * [Webflow](http://webflow.com/)
 * [Chess iX](http://www.chess-ix.com/)
