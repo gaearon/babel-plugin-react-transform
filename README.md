@@ -16,7 +16,9 @@ Time will show whether it is an amazing, or a terrible idea.
 
 ## Demo
 
-Check out **[react-transform-boilerplate](https://github.com/gaearon/react-transform-boilerplate)** for a demo.
+Check out **[react-transform-boilerplate](https://github.com/gaearon/react-transform-boilerplate)** for a demo showing a combination of transforms.
+
+![](http://i.imgur.com/AhGY28T.gif)
 
 ## Installation
 
