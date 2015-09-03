@@ -14,6 +14,10 @@ Such transforms can do a variety of things:
 The limit is your imagination and the time you feel compelled to spend on writing these transforms.  
 Time will show whether it is an amazing, or a terrible idea.
 
+## Demo
+
+Check out [react-transform-boilerplate](https://github.com/gaearon/react-transform-boilerplate) for a ready-to-use setup and an example of capabilities.
+
 ## Installation
 
 First, install the plugin:
