@@ -43,15 +43,13 @@ It must be an array of the transforms you want to use:
     "react-transform": [{
       // can be an NPM module name or a local path
       "target": "react-transform-webpack-hmr",
-      // will be available as options.imports to the transform
+      // see specific transform's docs for "imports" and "locals" it needs
       "imports": ["react"],
-      // will be available as options.locals to the transform
       "locals": ["module"]
     }, {
-      // can be an NPM module name or a local path
+      // you can have many transforms, not just one
       "target": "react-transform-catch-errors",
-      // will be available as options.imports to the transform
-      "imports": ["react", "redbox-react"]
+      "imports": ["react", "redbox-react/dist/index"]
     }, {
       // can be an NPM module name or a local path
       "target": "./src/my-custom-transform"
