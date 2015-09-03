@@ -6,7 +6,7 @@ export default function ({ Plugin, types: t }) {
     if (specifiedPath[0] === '.') {
       throw new Error(
         `Relative path like ${specifiedPath} is only allowed if ` +
-        `babel-plugin-wrap-react-components is inside a node_modules folder.`
+        `babel-plugin-react-transform is inside a node_modules folder.`
       );
     }
     return specifiedPath;
@@ -89,11 +89,11 @@ export default function ({ Plugin, types: t }) {
     if (!file.opts || !file.opts.extra) {
       return;
     }
-    const pluginOptions = file.opts.extra['babel-plugin-wrap-react-components'];
+    const pluginOptions = file.opts.extra['react-transform'];
     if (!Array.isArray(pluginOptions) || pluginOptions.length === 0) {
       throw new Error(
-        'babel-plugin-wrap-react-components requires that you specify ' +
-        'extras["babel-plugin-wrap-react-components"] in .babelrc ' +
+        'babel-plugin-react-transform requires that you specify ' +
+        'extras["react-transform"] in .babelrc ' +
         'or in your Babel Node API call options, and that it is an array ' +
         'with more than zero elements.'
       );
@@ -211,7 +211,7 @@ export default function ({ Plugin, types: t }) {
     );
   }
 
-  return new Plugin('babel-plugin-wrap-react-components', {
+  return new Plugin('babel-plugin-react-transform', {
     visitor: {
       Function: {
         enter(node, parent, scope, file) {

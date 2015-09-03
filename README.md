@@ -30,18 +30,18 @@ npm install --save-dev react-transform-webpack-hmr
 npm install --save-dev react-transform-catch-errors
 ```
 
-Then edit your `.babelrc` to include `extra.babel-plugin-react-transform`.  
+Then edit your `.babelrc` to include `extra.react-transform`.  
 It must be an array of the transforms you want to use:
 
 ```js
 {
   "stage": 0,
   "plugins": [
-    "babel-plugin-react-transform"
+    "react-transform"
   ],
   "extra": {
     // must be defined and be an array
-    "babel-plugin-react-transform": [{
+    "react-transform": [{
       // can be an NPM module name or a local path
       "target": "react-transform-webpack-hmr",
       // will be available as options.imports to the transform

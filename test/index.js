@@ -17,7 +17,7 @@ describe('finds React components', () => {
       const actual = transformFileSync(actualPath, {
         plugins: [plugin],
         extra: {
-          'babel-plugin-wrap-react-components': [{
+          'react-transform': [{
             target: 'my-custom-module/wrap',
             locals: ['module'],
             imports: ['react']
