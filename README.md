@@ -25,7 +25,6 @@ npm install --save-dev babel-plugin-react-transform
 Then, install the transforms you’re interested in:
 
 ```
-# Okay, these don't actually exist yet but I'll publish them soon
 npm install --save-dev react-transform-webpack-hmr
 npm install --save-dev react-transform-catch-errors
 ```
