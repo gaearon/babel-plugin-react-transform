@@ -5,10 +5,10 @@ In other words, **it lets you instrument React components** in any custom way.
 
 Such transforms can do a variety of things:
 
-* catch errors inside `render()` and render them in a [red screen of death](https://github.com/KeywordBrain/redbox-react);
-* enable hot reloading a la [React Hot Loader](https://github.com/gaearon/react-hot-loader);
-* render an inline prop inspector a la [React DevTools](https://github.com/facebook/react-devtools);
-* highlight parts of the screen when components update,
+* catch errors inside `render()` like [react-transform-catch-errors](https://github.com/gaearon/react-transform-catch-errors)
+* enable hot reloading like [react-transform-webpack-hmr](https://github.com/gaearon/react-transform-webpack-hmr);
+* render an inline prop inspector like [react-transform-debug-inspector](https://github.com/alexkuz/react-transform-debug-inspector);
+* highlight parts of the screen when components update (want to write this one?),
 * etc.
 
 The limit is your imagination and the time you feel compelled to spend on writing these transforms.  
@@ -174,6 +174,13 @@ export default function logAllUpdates(options) {
 
 Now go ahead and write your own!  
 Don’t forget to tag it with `react-transform` keyword on npm.
+
+## Ecosystem
+
+* https://github.com/gaearon/react-transform-webpack-hmr
+* https://github.com/gaearon/react-transform-catch-errors
+* https://github.com/alexkuz/react-transform-debug-inspector
+* Feeling inspired? Send a PR!
 
 ## License
 
