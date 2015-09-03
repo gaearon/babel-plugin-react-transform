@@ -5,9 +5,9 @@ In other words, **it lets you instrument React components** in any custom way.
 
 Such transforms can do a variety of things:
 
-* catch errors inside `render()` like [react-transform-catch-errors](https://github.com/gaearon/react-transform-catch-errors)
-* enable hot reloading like [react-transform-webpack-hmr](https://github.com/gaearon/react-transform-webpack-hmr);
-* render an inline prop inspector like [react-transform-debug-inspector](https://github.com/alexkuz/react-transform-debug-inspector);
+* catch errors inside `render()` like **[react-transform-catch-errors](https://github.com/gaearon/react-transform-catch-errors)**;
+* enable hot reloading like **[react-transform-webpack-hmr](https://github.com/gaearon/react-transform-webpack-hmr)**;
+* render an inline prop inspector like **[react-transform-debug-inspector](https://github.com/alexkuz/react-transform-debug-inspector)**;
 * highlight parts of the screen when components update (want to write this one?),
 * etc.
 
@@ -16,7 +16,7 @@ Time will show whether it is an amazing, or a terrible idea.
 
 ## Demo
 
-Check out [react-transform-boilerplate](https://github.com/gaearon/react-transform-boilerplate) for a ready-to-use setup and an example of capabilities.
+Check out **[react-transform-boilerplate](https://github.com/gaearon/react-transform-boilerplate)** for a demo.
 
 ## Installation
 
@@ -178,9 +178,10 @@ Don’t forget to tag it with `react-transform` keyword on npm.
 
 ## Ecosystem
 
-* https://github.com/gaearon/react-transform-webpack-hmr
-* https://github.com/gaearon/react-transform-catch-errors
-* https://github.com/alexkuz/react-transform-debug-inspector
+* **https://github.com/gaearon/react-transform-boilerplate**
+* **https://github.com/gaearon/react-transform-webpack-hmr**
+* **https://github.com/gaearon/react-transform-catch-errors**
+* **https://github.com/alexkuz/react-transform-debug-inspector**
 * Feeling inspired? Send a PR!
 
 ## License
