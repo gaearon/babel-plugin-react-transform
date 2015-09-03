@@ -55,7 +55,7 @@ It must be an array of the transforms you want to use:
     }, {
       // you can have many transforms, not just one
       "target": "react-transform-catch-errors",
-      "imports": ["react", "redbox-react/dist/redbox"]
+      "imports": ["react", "redbox-react"]
     }, {
       // can be an NPM module name or a local path
       "target": "./src/my-custom-transform"
