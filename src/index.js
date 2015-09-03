@@ -172,6 +172,15 @@ export default function ({ Plugin, types: t }) {
     const { target, imports = [], locals = [] } = targetOptions;
     const { filename } = file.opts;
 
+    function isSameAsFileBeingProcessed(importPath) {
+      const { dir, base, ext, name } = path.parse(resolvePath(importPath, filename));
+      return dir === '.' && name === path.parse(filename).name;
+    }
+
+    if (imports.some(isSameAsFileBeingProcessed)) {
+      return;
+    }
+
     return [id, t.variableDeclaration('var', [
       t.variableDeclarator(id,
         t.callExpression(file.addImport(resolvePath(target, filename)), [
@@ -272,7 +281,7 @@ export default function ({ Plugin, types: t }) {
           // Import transformation functions and initialize them
           const initTransformCalls = allTransformOptions.map(transformOptions =>
             defineInitTransformCall(scope, file, recordsId, transformOptions)
-          );
+          ).filter(Boolean);
           const initTransformIds = initTransformCalls.map(c => c[0]);
           const initTransformVars = initTransformCalls.map(c => c[1]);
 
