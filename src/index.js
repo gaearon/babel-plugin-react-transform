@@ -1,4 +1,5 @@
 import path from 'path';
+import parsePath from 'path-parse';
 
 export default function ({ Plugin, types: t }) {
   const parentDir = path.resolve(path.join(__dirname, '..', '..'));
@@ -24,9 +25,9 @@ export default function ({ Plugin, types: t }) {
     resolvePathAssumingWeAreInNodeModules :
     resolvePathConservatively;
 
-  const depthKey = Symbol('depth');
-  const recordsKey = Symbol('records');
-  const wrapComponentIdKey = Symbol('wrapComponentId');
+  const depthKey = '__reactTransformDepth';
+  const recordsKey = '__reactTransformRecords';
+  const wrapComponentIdKey = '__reactTransformWrapComponentId';
 
   function isRenderMethod(member) {
     return member.kind === 'method' &&
@@ -173,8 +174,8 @@ export default function ({ Plugin, types: t }) {
     const { filename } = file.opts;
 
     function isSameAsFileBeingProcessed(importPath) {
-      const { dir, base, ext, name } = path.parse(resolvePath(importPath, filename));
-      return dir === '.' && name === path.parse(filename).name;
+      const { dir, base, ext, name } = parsePath(resolvePath(importPath, filename));
+      return dir === '.' && name === parsePath(filename).name;
     }
 
     if (imports.some(isSameAsFileBeingProcessed)) {

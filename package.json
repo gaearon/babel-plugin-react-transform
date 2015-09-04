@@ -31,5 +31,8 @@
     "react",
     "reactjs",
     "components"
-  ]
+  ],
+  "dependencies": {
+    "path-parse": "^1.0.5"
+  }
 }
