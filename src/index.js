@@ -175,7 +175,7 @@ export default function ({ Plugin, types: t }) {
    */
   function defineInitTransformCall(scope, file, recordsId, targetOptions) {
     const id = scope.generateUidIdentifier('reactComponentWrapper');
-    const { target, imports = [], locals = [] } = targetOptions;
+    const { transform, imports = [], locals = [] } = targetOptions;
     const { filename } = file.opts;
 
     function isSameAsFileBeingProcessed(importPath) {
@@ -189,7 +189,7 @@ export default function ({ Plugin, types: t }) {
 
     return [id, t.variableDeclaration('var', [
       t.variableDeclarator(id,
-        t.callExpression(file.addImport(resolvePath(target, filename)), [
+        t.callExpression(file.addImport(resolvePath(transform, filename)), [
           t.objectExpression([
             t.property('init', t.identifier('filename'), t.literal(filename)),
             t.property('init', t.identifier('components'), recordsId),

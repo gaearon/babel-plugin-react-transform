@@ -59,17 +59,17 @@ It must be an array of the transforms you want to use:
         "react-transform": {
           transforms: [{
             // can be an NPM module name or a local path
-            "target": "react-transform-webpack-hmr",
+            "transform": "react-transform-webpack-hmr",
             // see specific transform's docs for "imports" and "locals" it needs
             "imports": ["react"],
             "locals": ["module"]
           }, {
             // you can have many transforms, not just one
-            "target": "react-transform-catch-errors",
+            "transform": "react-transform-catch-errors",
             "imports": ["react", "redbox-react"]
           }, {
             // can be an NPM module name or a local path
-            "target": "./src/my-custom-transform"
+            "transform": "./src/my-custom-transform"
           }]
         }
       }
@@ -78,7 +78,7 @@ It must be an array of the transforms you want to use:
 }
 ```
 
-As you can see each transform, apart from the `target` field where you write it name, also has `imports` and `locals` fields. You should consult the docs of each individual transform to learn which `imports` and `locals` it might need, and how it uses them. You probably already guessed that this is just a way to inject local variables (like `module`) or dependencies (like `react`) into the transforms that need them.
+As you can see each transform, apart from the `transform` field where you write it name, also has `imports` and `locals` fields. You should consult the docs of each individual transform to learn which `imports` and `locals` it might need, and how it uses them. You probably already guessed that this is just a way to inject local variables (like `module`) or dependencies (like `react`) into the transforms that need them.
 
 ## Writing a Transform
 

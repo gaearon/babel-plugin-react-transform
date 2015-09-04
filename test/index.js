@@ -19,11 +19,11 @@ describe('finds React components', () => {
         extra: {
           'react-transform': {
             transforms: [{
-              target: 'my-custom-module/wrap',
+              transform: 'my-custom-module/wrap',
               locals: ['module'],
               imports: ['react']
             }, {
-              target: 'my-other-custom-module/wrap'
+              transform: 'my-other-custom-module/wrap'
             }]
           }
         }
