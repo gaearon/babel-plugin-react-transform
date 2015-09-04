@@ -24,7 +24,12 @@ describe('finds React components', () => {
               imports: ['react']
             }, {
               transform: 'my-other-custom-module/wrap'
-            }]
+            }],
+            factoryMethods: [
+              'React.createClass',
+              'createClass',
+              'myComponentFactory'
+            ]
           }
         }
       }).code;

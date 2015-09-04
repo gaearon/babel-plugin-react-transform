@@ -28,6 +28,7 @@ export default function ({ Plugin, types: t }) {
   const depthKey = '__reactTransformDepth';
   const recordsKey = '__reactTransformRecords';
   const wrapComponentIdKey = '__reactTransformWrapComponentId';
+  const optionsKey = '__reactTransformOptions';
 
   function isRenderMethod(member) {
     return member.kind === 'method' &&
@@ -41,15 +42,28 @@ export default function ({ Plugin, types: t }) {
     return cls.body.body.filter(isRenderMethod).length > 0;
   }
 
-  const isCreateClassCallExpression = t.buildMatchMemberExpression('React.createClass');
+  function isCreateClassCallExpression(node, factoryMethods) {
+    for (const method of factoryMethods) {
+      if (method.indexOf('.') !== -1) {
+        if (t.buildMatchMemberExpression(method)(node.callee)) {
+          return true;
+        }
+      } else {
+        if (node.callee.name === method) {
+          return true;
+        }
+      }
+    }
+  }
+
   /**
    * Does this node look like a createClass() call?
    */
-  function isCreateClass(node) {
+  function isCreateClass(node, factoryMethods = ['React.createClass', 'createClass']) {
     if (!node || !t.isCallExpression(node)) {
       return false;
     }
-    if (!isCreateClassCallExpression(node.callee)) {
+    if (!isCreateClassCallExpression(node, factoryMethods)) {
       return false;
     }
     const args = node.arguments;
@@ -256,7 +270,8 @@ export default function ({ Plugin, types: t }) {
 
       CallExpression: {
         exit(node, parent, scope, file) {
-          if (!isCreateClass(node)) {
+          const { factoryMethods } = this.state[optionsKey];
+          if (!isCreateClass(node, factoryMethods)) {
             return;
           }
 
@@ -272,6 +287,7 @@ export default function ({ Plugin, types: t }) {
 
       Program: {
         enter(node, parent, scope, file) {
+          this.state[optionsKey] = getPluginOptions(file);
           this.state[wrapComponentIdKey] = scope.generateUidIdentifier('wrapComponent');
         },
 
@@ -281,11 +297,12 @@ export default function ({ Plugin, types: t }) {
           }
 
           // Generate a variable holding component records
-          const allTransformOptions = getPluginOptions(file).transforms;
+          const allTransforms = this.state[optionsKey].transforms;
+
           const [recordsId, recordsVar] = defineComponentRecords(scope, this.state);
 
           // Import transformation functions and initialize them
-          const initTransformCalls = allTransformOptions.map(transformOptions =>
+          const initTransformCalls = allTransforms.map(transformOptions =>
             defineInitTransformCall(scope, file, recordsId, transformOptions)
           ).filter(Boolean);
           const initTransformIds = initTransformCalls.map(c => c[0]);

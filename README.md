@@ -200,10 +200,6 @@ Don’t forget to tag it with `react-transform` keyword on npm.
 * **https://github.com/alexkuz/react-transform-debug-inspector**
 * Feeling inspired? Send a PR!
 
-## Limitations
-
-Currently, it can only locate components of two types: ES6 classes with `render` method and explicit `React.createClass()` calls. I’m open to adding more heuristics for other common patterns, given enough interest.
-
 When using `React.createClass()` and allowing `babel` to extract the `displayName` property you must ensure that [babel-plugin-react-display-name](https://github.com/babel/babel/tree/development/packages/babel-plugin-react-display-name) is included before `react-transform`. See [this github issue](https://github.com/gaearon/babel-plugin-react-transform/issues/19) for more details.
 
 ## Discussion
