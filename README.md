@@ -56,20 +56,22 @@ It must be an array of the transforms you want to use:
       ],
       "extra": {
         // must be defined and be an array
-        "react-transform": [{
-          // can be an NPM module name or a local path
-          "target": "react-transform-webpack-hmr",
-          // see specific transform's docs for "imports" and "locals" it needs
-          "imports": ["react"],
-          "locals": ["module"]
-        }, {
-          // you can have many transforms, not just one
-          "target": "react-transform-catch-errors",
-          "imports": ["react", "redbox-react"]
-        }, {
-          // can be an NPM module name or a local path
-          "target": "./src/my-custom-transform"
-        }]
+        "react-transform": {
+          transforms: [{
+            // can be an NPM module name or a local path
+            "target": "react-transform-webpack-hmr",
+            // see specific transform's docs for "imports" and "locals" it needs
+            "imports": ["react"],
+            "locals": ["module"]
+          }, {
+            // you can have many transforms, not just one
+            "target": "react-transform-catch-errors",
+            "imports": ["react", "redbox-react"]
+          }, {
+            // can be an NPM module name or a local path
+            "target": "./src/my-custom-transform"
+          }]
+        }
       }
     }
   }

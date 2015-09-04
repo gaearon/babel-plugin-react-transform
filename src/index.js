@@ -83,6 +83,11 @@ export default function ({ Plugin, types: t }) {
     }
   }
 
+  function isValidOptions(options) {
+    return typeof options === 'object' &&
+      Array.isArray(options.transforms);
+  }
+
   /**
    * Enforces plugin options to be defined and returns them.
    */
@@ -91,11 +96,12 @@ export default function ({ Plugin, types: t }) {
       return;
     }
     const pluginOptions = file.opts.extra['react-transform'];
-    if (!Array.isArray(pluginOptions)) {
+    if (!isValidOptions(pluginOptions)) {
       throw new Error(
         'babel-plugin-react-transform requires that you specify ' +
         'extras["react-transform"] in .babelrc ' +
-        'or in your Babel Node API call options, and that it is an array.'
+        'or in your Babel Node API call options, and that it is an object with ' +
+        'a transforms property which is an array.'
       );
     }
     return pluginOptions;
@@ -130,7 +136,7 @@ export default function ({ Plugin, types: t }) {
 
   /**
    * Memorizes the fact that we have visited a valid component in the plugin state.
-   * We will later retrieved memorized records to compose an object out of them.
+   * We will later retrieve memorized records to compose an object out of them.
    */
   function addComponentRecord(node, scope, file, state) {
     const [uniqueId, definition] = createComponentRecord(node, scope, file, state);
@@ -275,7 +281,7 @@ export default function ({ Plugin, types: t }) {
           }
 
           // Generate a variable holding component records
-          const allTransformOptions = getPluginOptions(file);
+          const allTransformOptions = getPluginOptions(file).transforms;
           const [recordsId, recordsVar] = defineComponentRecords(scope, this.state);
 
           // Import transformation functions and initialize them

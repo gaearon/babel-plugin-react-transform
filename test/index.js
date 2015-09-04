@@ -17,13 +17,15 @@ describe('finds React components', () => {
       const actual = transformFileSync(actualPath, {
         plugins: [plugin],
         extra: {
-          'react-transform': [{
-            target: 'my-custom-module/wrap',
-            locals: ['module'],
-            imports: ['react']
-          }, {
-            target: 'my-other-custom-module/wrap'
-          }]
+          'react-transform': {
+            transforms: [{
+              target: 'my-custom-module/wrap',
+              locals: ['module'],
+              imports: ['react']
+            }, {
+              target: 'my-other-custom-module/wrap'
+            }]
+          }
         }
       }).code;
       const expected = fs.readFileSync(
