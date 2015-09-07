@@ -43,25 +43,32 @@ It must be an array of the transforms you want to use:
 ```js
 {
   "stage": 0,
-  "plugins": [
-    "react-transform"
-  ],
-  "extra": {
-    // must be defined and be an array
-    "react-transform": [{
-      // can be an NPM module name or a local path
-      "target": "react-transform-webpack-hmr",
-      // see specific transform's docs for "imports" and "locals" it needs
-      "imports": ["react"],
-      "locals": ["module"]
-    }, {
-      // you can have many transforms, not just one
-      "target": "react-transform-catch-errors",
-      "imports": ["react", "redbox-react"]
-    }, {
-      // can be an NPM module name or a local path
-      "target": "./src/my-custom-transform"
-    }]
+  "env": {
+    // this plugin will be included only in development mode, e.g.
+    // if NODE_ENV (or BABEL_ENV) environment variable is not set
+    // or is equal to "development"
+    "development": {
+      "plugins": [
+        "react-transform"
+      ],
+      "extra": {
+        // must be defined and be an array
+        "react-transform": [{
+          // can be an NPM module name or a local path
+          "target": "react-transform-webpack-hmr",
+          // see specific transform's docs for "imports" and "locals" it needs
+          "imports": ["react"],
+          "locals": ["module"]
+        }, {
+          // you can have many transforms, not just one
+          "target": "react-transform-catch-errors",
+          "imports": ["react", "redbox-react"]
+        }, {
+          // can be an NPM module name or a local path
+          "target": "./src/my-custom-transform"
+        }]
+      }
+    }
   }
 }
 ```
