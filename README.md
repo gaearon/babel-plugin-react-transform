@@ -49,8 +49,9 @@ It must be an array of the transforms you want to use:
     // or is equal to "development"
     "development": {
       "plugins": [
-        //include babel-plugin-react-display-name if using React.createClass({}) BEFORE react-transform.
-        //"react-display-name",
+        // Include babel-plugin-react-display-name if you’re
+        // using React.createClass() *before* react-transform:
+        // "react-display-name",
         "react-transform"
       ],
       "extra": {
