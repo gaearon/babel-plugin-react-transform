@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-react-transform",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Babel plugin to instrument React components with custom transforms",
   "main": "lib/index.js",
   "repository": {
