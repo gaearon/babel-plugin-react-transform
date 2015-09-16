@@ -91,12 +91,11 @@ export default function ({ Plugin, types: t }) {
       return;
     }
     const pluginOptions = file.opts.extra['react-transform'];
-    if (!Array.isArray(pluginOptions) || pluginOptions.length === 0) {
+    if (!Array.isArray(pluginOptions)) {
       throw new Error(
         'babel-plugin-react-transform requires that you specify ' +
         'extras["react-transform"] in .babelrc ' +
-        'or in your Babel Node API call options, and that it is an array ' +
-        'with more than zero elements.'
+        'or in your Babel Node API call options, and that it is an array.'
       );
     }
     return pluginOptions;
