@@ -15,13 +15,15 @@
   "homepage": "https://github.com/gaearon/babel-plugin-react-transform#readme",
   "devDependencies": {
     "babel": "^5.8.23",
-    "mocha": "^2.2.5"
+    "mocha": "^2.2.5",
+    "rimraf": "^2.4.3"
   },
   "scripts": {
+    "clean": "rimraf lib",
     "build": "babel-plugin build",
     "test": "mocha --compilers js:babel/register",
     "test:watch": "npm run test -- --watch",
-    "prepublish": "npm run build"
+    "prepublish": "npm run clean && npm run build"
   },
   "keywords": [
     "babel-plugin",
