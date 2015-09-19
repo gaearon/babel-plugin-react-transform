@@ -8,7 +8,8 @@ Such transforms can do a variety of things:
 * catch errors inside `render()` like **[react-transform-catch-errors](https://github.com/gaearon/react-transform-catch-errors)**;
 * enable hot reloading like **[react-transform-webpack-hmr](https://github.com/gaearon/react-transform-webpack-hmr)**;
 * render an inline prop inspector like **[react-transform-debug-inspector](https://github.com/alexkuz/react-transform-debug-inspector)**;
-* highlight parts of the screen when components update (want to write this one?),
+* highlight parts of the screen when components update like
+**[react-transform-render-visualizer](https://github.com/spredfast/react-transform-render-visualizer)**;
 * etc.
 
 The limit is your imagination and the time you feel compelled to spend on writing these transforms.  
