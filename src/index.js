@@ -29,6 +29,7 @@ export default function ({ Plugin, types: t }) {
   const recordsKey = '__reactTransformRecords';
   const wrapComponentIdKey = '__reactTransformWrapComponentId';
   const optionsKey = '__reactTransformOptions';
+  const cacheKey = '__reactTransformCache';
 
   function isRenderMethod(member) {
     return member.kind === 'method' &&
@@ -42,15 +43,23 @@ export default function ({ Plugin, types: t }) {
     return cls.body.body.filter(isRenderMethod).length > 0;
   }
 
-  function isCreateClassCallExpression(node, factoryMethods) {
+  function buildIsCreateClassCallExpression(factoryMethods) {
+    const matchMemberExpressions = {};
+
     for (const method of factoryMethods) {
-      if (method.indexOf('.') !== -1) {
-        if (t.buildMatchMemberExpression(method)(node.callee)) {
-          return true;
-        }
-      } else {
-        if (node.callee.name === method) {
-          return true;
+      matchMemberExpressions[method] = t.buildMatchMemberExpression(method);
+    }
+
+    return node => {
+      for (const method of factoryMethods) {
+        if (method.indexOf('.') !== -1) {
+          if (matchMemberExpressions[method](node.callee)) {
+            return true;
+          }
+        } else {
+          if (node.callee.name === method) {
+            return true;
+          }
         }
       }
     }
@@ -59,11 +68,11 @@ export default function ({ Plugin, types: t }) {
   /**
    * Does this node look like a createClass() call?
    */
-  function isCreateClass(node, factoryMethods = ['React.createClass', 'createClass']) {
+  function isCreateClass(node, isCreateClassCallExpression) {
     if (!node || !t.isCallExpression(node)) {
       return false;
     }
-    if (!isCreateClassCallExpression(node, factoryMethods)) {
+    if (!isCreateClassCallExpression(node)) {
       return false;
     }
     const args = node.arguments;
@@ -270,8 +279,8 @@ export default function ({ Plugin, types: t }) {
 
       CallExpression: {
         exit(node, parent, scope, file) {
-          const { factoryMethods } = this.state[optionsKey];
-          if (!isCreateClass(node, factoryMethods)) {
+          const { isCreateClassCallExpression } = this.state[cacheKey];
+          if (!isCreateClass(node, isCreateClassCallExpression)) {
             return;
           }
 
@@ -287,7 +296,13 @@ export default function ({ Plugin, types: t }) {
 
       Program: {
         enter(node, parent, scope, file) {
-          this.state[optionsKey] = getPluginOptions(file);
+          const options = getPluginOptions(file);
+          const factoryMethods = options.factoryMethods || ['React.createClass', 'createClass'];
+          this.state[optionsKey] = options;
+          this.state[cacheKey] = {
+            isCreateClassCallExpression: buildIsCreateClassCallExpression(factoryMethods),
+          };
+
           this.state[wrapComponentIdKey] = scope.generateUidIdentifier('wrapComponent');
         },
 
