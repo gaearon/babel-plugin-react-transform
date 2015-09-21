@@ -6,7 +6,7 @@ In other words, **it lets you instrument React components** in any custom way.
 Such transforms can do a variety of things:
 
 * catch errors inside `render()` like **[react-transform-catch-errors](https://github.com/gaearon/react-transform-catch-errors)**;
-* enable hot reloading like **[react-transform-webpack-hmr](https://github.com/gaearon/react-transform-webpack-hmr)**;
+* enable hot reloading like **[react-transform-hmr](https://github.com/gaearon/react-transform-hmr)**;
 * render an inline prop inspector like **[react-transform-debug-inspector](https://github.com/alexkuz/react-transform-debug-inspector)**;
 * highlight parts of the screen when components update like
 **[react-transform-render-visualizer](https://github.com/spredfast/react-transform-render-visualizer)**;
@@ -34,7 +34,7 @@ npm install --save-dev babel-plugin-react-transform
 Then, install the transforms you’re interested in:
 
 ```
-npm install --save-dev react-transform-webpack-hmr
+npm install --save-dev react-transform-hmr
 npm install --save-dev react-transform-catch-errors
 ```
 
@@ -59,7 +59,7 @@ It must be an array of the transforms you want to use:
         // must be defined and be an array
         "react-transform": [{
           // can be an NPM module name or a local path
-          "target": "react-transform-webpack-hmr",
+          "target": "react-transform-hmr",
           // see specific transform's docs for "imports" and "locals" it needs
           "imports": ["react"],
           "locals": ["module"]
@@ -194,7 +194,7 @@ Don’t forget to tag it with `react-transform` keyword on npm.
 ## Ecosystem
 
 * **https://github.com/gaearon/react-transform-boilerplate**
-* **https://github.com/gaearon/react-transform-webpack-hmr**
+* **https://github.com/gaearon/react-transform-hmr**
 * **https://github.com/gaearon/react-transform-catch-errors**
 * **https://github.com/alexkuz/react-transform-debug-inspector**
 * Feeling inspired? Send a PR!
