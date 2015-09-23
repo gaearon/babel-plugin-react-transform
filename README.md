@@ -57,27 +57,29 @@ It must be an array of the transforms you want to use:
       ],
       "extra": {
         // must be defined and be an array
-        "react-transform": [{
-          // can be an NPM module name or a local path
-          "target": "react-transform-hmr",
-          // see specific transform's docs for "imports" and "locals" it needs
-          "imports": ["react"],
-          "locals": ["module"]
-        }, {
-          // you can have many transforms, not just one
-          "target": "react-transform-catch-errors",
-          "imports": ["react", "redbox-react"]
-        }, {
-          // can be an NPM module name or a local path
-          "target": "./src/my-custom-transform"
-        }]
+        "react-transform": {
+          transforms: [{
+            // can be an NPM module name or a local path
+            "transform": "react-transform-hmr",
+            // see specific transform's docs for "imports" and "locals" it needs
+            "imports": ["react"],
+            "locals": ["module"]
+          }, {
+            // you can have many transforms, not just one
+            "transform": "react-transform-catch-errors",
+            "imports": ["react", "redbox-react"]
+          }, {
+            // can be an NPM module name or a local path
+            "transform": "./src/my-custom-transform"
+          }]
+        }
       }
     }
   }
 }
 ```
 
-As you can see each transform, apart from the `target` field where you write it name, also has `imports` and `locals` fields. You should consult the docs of each individual transform to learn which `imports` and `locals` it might need, and how it uses them. You probably already guessed that this is just a way to inject local variables (like `module`) or dependencies (like `react`) into the transforms that need them.
+As you can see each transform, apart from the `transform` field where you write it name, also has `imports` and `locals` fields. You should consult the docs of each individual transform to learn which `imports` and `locals` it might need, and how it uses them. You probably already guessed that this is just a way to inject local variables (like `module`) or dependencies (like `react`) into the transforms that need them.
 
 ## Writing a Transform
 
@@ -198,10 +200,6 @@ Don’t forget to tag it with `react-transform` keyword on npm.
 * **https://github.com/gaearon/react-transform-catch-errors**
 * **https://github.com/alexkuz/react-transform-debug-inspector**
 * Feeling inspired? Send a PR!
-
-## Limitations
-
-Currently, it can only locate components of two types: ES6 classes with `render` method and explicit `React.createClass()` calls. I’m open to adding more heuristics for other common patterns, given enough interest.
 
 When using `React.createClass()` and allowing `babel` to extract the `displayName` property you must ensure that [babel-plugin-react-display-name](https://github.com/babel/babel/tree/development/packages/babel-plugin-react-display-name) is included before `react-transform`. See [this github issue](https://github.com/gaearon/babel-plugin-react-transform/issues/19) for more details.
 

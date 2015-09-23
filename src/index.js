@@ -28,6 +28,8 @@ export default function ({ Plugin, types: t }) {
   const depthKey = '__reactTransformDepth';
   const recordsKey = '__reactTransformRecords';
   const wrapComponentIdKey = '__reactTransformWrapComponentId';
+  const optionsKey = '__reactTransformOptions';
+  const cacheKey = '__reactTransformCache';
 
   function isRenderMethod(member) {
     return member.kind === 'method' &&
@@ -41,15 +43,36 @@ export default function ({ Plugin, types: t }) {
     return cls.body.body.filter(isRenderMethod).length > 0;
   }
 
-  const isCreateClassCallExpression = t.buildMatchMemberExpression('React.createClass');
+  function buildIsCreateClassCallExpression(factoryMethods) {
+    const matchMemberExpressions = {};
+
+    for (const method of factoryMethods) {
+      matchMemberExpressions[method] = t.buildMatchMemberExpression(method);
+    }
+
+    return node => {
+      for (const method of factoryMethods) {
+        if (method.indexOf('.') !== -1) {
+          if (matchMemberExpressions[method](node.callee)) {
+            return true;
+          }
+        } else {
+          if (node.callee.name === method) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+
   /**
    * Does this node look like a createClass() call?
    */
-  function isCreateClass(node) {
+  function isCreateClass(node, isCreateClassCallExpression) {
     if (!node || !t.isCallExpression(node)) {
       return false;
     }
-    if (!isCreateClassCallExpression(node.callee)) {
+    if (!isCreateClassCallExpression(node)) {
       return false;
     }
     const args = node.arguments;
@@ -83,6 +106,11 @@ export default function ({ Plugin, types: t }) {
     }
   }
 
+  function isValidOptions(options) {
+    return typeof options === 'object' &&
+      Array.isArray(options.transforms);
+  }
+
   /**
    * Enforces plugin options to be defined and returns them.
    */
@@ -90,12 +118,27 @@ export default function ({ Plugin, types: t }) {
     if (!file.opts || !file.opts.extra) {
       return;
     }
-    const pluginOptions = file.opts.extra['react-transform'];
-    if (!Array.isArray(pluginOptions)) {
+    let pluginOptions = file.opts.extra['react-transform'];
+    if (Array.isArray(pluginOptions)) {
+      console.warn(
+        'Warning: you\'re using an outdated format of React Transform configuration. ' +
+        'Please update your configuration to the new format. See README for details: ' +
+        'https://github.com/gaearon/babel-plugin-react-transform'
+      );
+
+      const transforms = pluginOptions.map(option => {
+        option.transform = option.transform || option.target;
+        return option;
+      });
+      pluginOptions = { transforms };
+    }
+
+    if (!isValidOptions(pluginOptions)) {
       throw new Error(
         'babel-plugin-react-transform requires that you specify ' +
         'extras["react-transform"] in .babelrc ' +
-        'or in your Babel Node API call options, and that it is an array.'
+        'or in your Babel Node API call options, and that it is an object with ' +
+        'a transforms property which is an array.'
       );
     }
     return pluginOptions;
@@ -130,7 +173,7 @@ export default function ({ Plugin, types: t }) {
 
   /**
    * Memorizes the fact that we have visited a valid component in the plugin state.
-   * We will later retrieved memorized records to compose an object out of them.
+   * We will later retrieve memorized records to compose an object out of them.
    */
   function addComponentRecord(node, scope, file, state) {
     const [uniqueId, definition] = createComponentRecord(node, scope, file, state);
@@ -169,7 +212,7 @@ export default function ({ Plugin, types: t }) {
    */
   function defineInitTransformCall(scope, file, recordsId, targetOptions) {
     const id = scope.generateUidIdentifier('reactComponentWrapper');
-    const { target, imports = [], locals = [] } = targetOptions;
+    const { transform, imports = [], locals = [] } = targetOptions;
     const { filename } = file.opts;
 
     function isSameAsFileBeingProcessed(importPath) {
@@ -183,7 +226,7 @@ export default function ({ Plugin, types: t }) {
 
     return [id, t.variableDeclaration('var', [
       t.variableDeclarator(id,
-        t.callExpression(file.addImport(resolvePath(target, filename)), [
+        t.callExpression(file.addImport(resolvePath(transform, filename)), [
           t.objectExpression([
             t.property('init', t.identifier('filename'), t.literal(filename)),
             t.property('init', t.identifier('components'), recordsId),
@@ -250,7 +293,8 @@ export default function ({ Plugin, types: t }) {
 
       CallExpression: {
         exit(node, parent, scope, file) {
-          if (!isCreateClass(node)) {
+          const { isCreateClassCallExpression } = this.state[cacheKey];
+          if (!isCreateClass(node, isCreateClassCallExpression)) {
             return;
           }
 
@@ -266,6 +310,13 @@ export default function ({ Plugin, types: t }) {
 
       Program: {
         enter(node, parent, scope, file) {
+          const options = getPluginOptions(file);
+          const factoryMethods = options.factoryMethods || ['React.createClass', 'createClass'];
+          this.state[optionsKey] = options;
+          this.state[cacheKey] = {
+            isCreateClassCallExpression: buildIsCreateClassCallExpression(factoryMethods),
+          };
+
           this.state[wrapComponentIdKey] = scope.generateUidIdentifier('wrapComponent');
         },
 
@@ -275,11 +326,12 @@ export default function ({ Plugin, types: t }) {
           }
 
           // Generate a variable holding component records
-          const allTransformOptions = getPluginOptions(file);
+          const allTransforms = this.state[optionsKey].transforms;
+
           const [recordsId, recordsVar] = defineComponentRecords(scope, this.state);
 
           // Import transformation functions and initialize them
-          const initTransformCalls = allTransformOptions.map(transformOptions =>
+          const initTransformCalls = allTransforms.map(transformOptions =>
             defineInitTransformCall(scope, file, recordsId, transformOptions)
           ).filter(Boolean);
           const initTransformIds = initTransformCalls.map(c => c[0]);

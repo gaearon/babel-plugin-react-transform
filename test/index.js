@@ -14,18 +14,8 @@ describe('finds React components', () => {
     it(`should ${caseName.split('-').join(' ')}`, () => {
       const fixtureDir = path.join(fixturesDir, caseName);
       const actualPath = path.join(fixtureDir, 'actual.js');
-      const actual = transformFileSync(actualPath, {
-        plugins: [plugin],
-        extra: {
-          'react-transform': [{
-            target: 'my-custom-module/wrap',
-            locals: ['module'],
-            imports: ['react']
-          }, {
-            target: 'my-other-custom-module/wrap'
-          }]
-        }
-      }).code;
+      const actual = transformFileSync(actualPath).code;
+
       const expected = fs.readFileSync(
         path.join(fixtureDir, 'expected.js')
       ).toString().replace(/%FIXTURE_PATH%/g, actualPath);
