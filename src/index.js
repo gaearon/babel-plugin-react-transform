@@ -118,7 +118,21 @@ export default function ({ Plugin, types: t }) {
     if (!file.opts || !file.opts.extra) {
       return;
     }
-    const pluginOptions = file.opts.extra['react-transform'];
+    let pluginOptions = file.opts.extra['react-transform'];
+    if (Array.isArray(pluginOptions)) {
+      console.warn(
+        'Warning: you\'re using an outdated format of React Transform configuration. ' +
+        'Please update your configuration to the new format. See README for details: ' +
+        'https://github.com/gaearon/babel-plugin-react-transform'
+      );
+
+      const transforms = pluginOptions.map(option => {
+        option.transform = option.transform || option.target;
+        return option;
+      });
+      pluginOptions = { transforms };
+    }
+
     if (!isValidOptions(pluginOptions)) {
       throw new Error(
         'babel-plugin-react-transform requires that you specify ' +
