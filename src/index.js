@@ -111,6 +111,19 @@ export default function ({ Plugin, types: t }) {
       Array.isArray(options.transforms);
   }
 
+  let didWarnAboutLegacyConfig = false;
+  function warnOnceAboutLegacyConfig() {
+    if (didWarnAboutLegacyConfig) {
+      return;
+    }
+    console.warn(
+      'Warning: you are using an outdated format of React Transform configuration. ' +
+      'Please update your configuration to the new format. See the Releases page for migration instructions: ' +
+      'https://github.com/gaearon/babel-plugin-react-transform/releases'
+    );
+    didWarnAboutLegacyConfig = true;
+  }
+
   /**
    * Enforces plugin options to be defined and returns them.
    */
@@ -118,14 +131,10 @@ export default function ({ Plugin, types: t }) {
     if (!file.opts || !file.opts.extra) {
       return;
     }
+
     let pluginOptions = file.opts.extra['react-transform'];
     if (Array.isArray(pluginOptions)) {
-      console.warn(
-        'Warning: you\'re using an outdated format of React Transform configuration. ' +
-        'Please update your configuration to the new format. See README for details: ' +
-        'https://github.com/gaearon/babel-plugin-react-transform'
-      );
-
+      warnOnceAboutLegacyConfig();
       const transforms = pluginOptions.map(option => {
         option.transform = option.transform || option.target;
         return option;
