@@ -39,7 +39,7 @@ npm install --save-dev react-transform-catch-errors
 ```
 
 Then edit your `.babelrc` to include `extra.react-transform`.  
-It must be an array of the transforms you want to use:
+It must be an object with a `transforms` property being an array of the transforms you want to use:
 
 ```js
 {
@@ -56,9 +56,10 @@ It must be an array of the transforms you want to use:
         "react-transform"
       ],
       "extra": {
-        // must be defined and be an array
+        // must be an object
         "react-transform": {
-          transforms: [{
+          // must be an array
+          "transforms": [{
             // can be an NPM module name or a local path
             "transform": "react-transform-hmr",
             // see specific transform's docs for "imports" and "locals" it needs
@@ -72,7 +73,10 @@ It must be an array of the transforms you want to use:
             // can be an NPM module name or a local path
             "transform": "./src/my-custom-transform"
           }]
-        }
+        },
+        // by default we only look for `React.createClass` (and ES6 classes)
+        // but you can tell the plugin to look for different component factories:
+        // factoryMethods: ["React.createClass", "createClass"]
       }
     }
   }
@@ -80,6 +84,10 @@ It must be an array of the transforms you want to use:
 ```
 
 As you can see each transform, apart from the `transform` field where you write it name, also has `imports` and `locals` fields. You should consult the docs of each individual transform to learn which `imports` and `locals` it might need, and how it uses them. You probably already guessed that this is just a way to inject local variables (like `module`) or dependencies (like `react`) into the transforms that need them.
+
+Note that when using `React.createClass()` and allowing `babel` to extract the `displayName` property you must ensure that [babel-plugin-react-display-name](https://github.com/babel/babel/tree/development/packages/babel-plugin-react-display-name) is included before `react-transform`. See [this github issue](https://github.com/gaearon/babel-plugin-react-transform/issues/19) for more details.
+
+You may optionally specify an array of strings called `factoryMethods` if you want the plugin to look for components created with a factory method other than `React.createClass`. Note that you don’t have to do anything special to look for ES6 components—`factoryMethods` is only relevant if you use factory methods akin to `React.createClass`.
 
 ## Writing a Transform
 
@@ -200,8 +208,6 @@ Don’t forget to tag it with `react-transform` keyword on npm.
 * **https://github.com/gaearon/react-transform-catch-errors**
 * **https://github.com/alexkuz/react-transform-debug-inspector**
 * Feeling inspired? Send a PR!
-
-When using `React.createClass()` and allowing `babel` to extract the `displayName` property you must ensure that [babel-plugin-react-display-name](https://github.com/babel/babel/tree/development/packages/babel-plugin-react-display-name) is included before `react-transform`. See [this github issue](https://github.com/gaearon/babel-plugin-react-transform/issues/19) for more details.
 
 ## Discussion
 
