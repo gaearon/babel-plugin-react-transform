@@ -46,12 +46,13 @@ export default function ({ Plugin, types: t }) {
   function buildIsCreateClassCallExpression(factoryMethods) {
     const matchMemberExpressions = {};
 
-    for (const method of factoryMethods) {
+    factoryMethods.forEach(method => {
       matchMemberExpressions[method] = t.buildMatchMemberExpression(method);
-    }
+    });
 
     return node => {
-      for (const method of factoryMethods) {
+      for (let i = 0; i < factoryMethods.length; i++) {
+        const method = factoryMethods[i];
         if (method.indexOf('.') !== -1) {
           if (matchMemberExpressions[method](node.callee)) {
             return true;
