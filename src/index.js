@@ -26,6 +26,7 @@ export default function ({ Plugin, types: t }) {
     resolvePathConservatively;
 
   const depthKey = '__reactTransformDepth';
+  const foundJSXKey = '__reactTransformFoundJSX';
   const recordsKey = '__reactTransformRecords';
   const wrapComponentIdKey = '__reactTransformWrapComponentId';
   const optionsKey = '__reactTransformOptions';
@@ -177,6 +178,12 @@ export default function ({ Plugin, types: t }) {
         t.literal(true)
       ));
     }
+    if (t.isFunction(node)) {
+      props.push(t.property('init',
+        t.identifier('isFunction'),
+        t.literal(true)
+      ));
+    }
 
     return [uniqueId, t.objectExpression(props)];
   }
@@ -275,6 +282,14 @@ export default function ({ Plugin, types: t }) {
 
   return new Plugin('babel-plugin-react-transform', {
     visitor: {
+      JSXElement: {
+        exit(node, parent, scope, file) {
+          if (this.state[depthKey] > 0) {
+            this.state[foundJSXKey] = true;
+          }
+        }
+      },
+
       Function: {
         enter(node, parent, scope, file) {
           if (!this.state[depthKey]) {
@@ -282,8 +297,29 @@ export default function ({ Plugin, types: t }) {
           }
           this.state[depthKey]++;
         },
+
         exit(node, parent, scope, file) {
           this.state[depthKey]--;
+
+          if (this.state[depthKey] > 0 || !this.state[foundJSXKey]) {
+            return;
+          }
+
+          delete this.state[foundJSXKey];
+
+          const wrapReactComponentId = this.state[wrapComponentIdKey];
+          const uniqueId = addComponentRecord(node, scope, file, this.state);
+          const bindingId = node.id;
+
+          return [
+            node,
+            t.assignmentExpression('=', bindingId,
+              t.callExpression(
+                t.callExpression(wrapReactComponentId, [t.literal(uniqueId)]),
+                [bindingId]
+              )
+            )
+          ];
         }
       },
 
@@ -337,7 +373,6 @@ export default function ({ Plugin, types: t }) {
 
           // Generate a variable holding component records
           const allTransforms = this.state[optionsKey].transforms;
-
           const [recordsId, recordsVar] = defineComponentRecords(scope, this.state);
 
           // Import transformation functions and initialize them
