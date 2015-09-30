@@ -91,9 +91,12 @@ export default function ({ Plugin, types: t }) {
   /**
    * Infers a displayName from either a class node, or a createClass() call node.
    */
-  function findDisplayName(node) {
+  function findDisplayName(node, parent) {
     if (node.id) {
       return node.id.name;
+    }
+    if (t.isArrowFunctionExpression(node) && t.isVariableDeclarator(parent)) {
+      return parent.id.name;
     }
     if (!node.arguments) {
       return;
@@ -159,8 +162,8 @@ export default function ({ Plugin, types: t }) {
    * Creates a record about us having visited a valid React component.
    * Such records will later be merged into a single object.
    */
-  function createComponentRecord(node, scope, file, state) {
-    const displayName = findDisplayName(node) || undefined;
+  function createComponentRecord(node, parent, scope, file, state) {
+    const displayName = findDisplayName(node, parent) || undefined;
     const uniqueId = scope.generateUidIdentifier(
       '$' + (displayName || 'Unknown')
     ).name;
@@ -192,8 +195,8 @@ export default function ({ Plugin, types: t }) {
    * Memorizes the fact that we have visited a valid component in the plugin state.
    * We will later retrieve memorized records to compose an object out of them.
    */
-  function addComponentRecord(node, scope, file, state) {
-    const [uniqueId, definition] = createComponentRecord(node, scope, file, state);
+  function addComponentRecord(node, parent, scope, file, state) {
+    const [uniqueId, definition] = createComponentRecord(node, parent, scope, file, state);
     state[recordsKey] = state[recordsKey] || [];
     state[recordsKey].push(t.property('init',
       t.identifier(uniqueId),
@@ -308,8 +311,15 @@ export default function ({ Plugin, types: t }) {
           delete this.state[foundJSXKey];
 
           const wrapReactComponentId = this.state[wrapComponentIdKey];
-          const uniqueId = addComponentRecord(node, scope, file, this.state);
+          const uniqueId = addComponentRecord(node, parent, scope, file, this.state);
           const bindingId = node.id;
+
+          if (t.isArrowFunctionExpression(node) && t.isVariableDeclarator(parent)) {
+            return t.callExpression(
+              t.callExpression(wrapReactComponentId, [t.literal(uniqueId)]),
+              [node]
+            );
+          }
 
           return [
             node,
@@ -329,7 +339,7 @@ export default function ({ Plugin, types: t }) {
         }
 
         const wrapReactComponentId = this.state[wrapComponentIdKey];
-        const uniqueId = addComponentRecord(node, scope, file, this.state);
+        const uniqueId = addComponentRecord(node, parent, scope, file, this.state);
 
         node.decorators = node.decorators || [];
         node.decorators.push(t.decorator(
@@ -345,7 +355,7 @@ export default function ({ Plugin, types: t }) {
           }
 
           const wrapReactComponentId = this.state[wrapComponentIdKey];
-          const uniqueId = addComponentRecord(node, scope, file, this.state);
+          const uniqueId = addComponentRecord(node, parent, scope, file, this.state);
 
           return t.callExpression(
             t.callExpression(wrapReactComponentId, [t.literal(uniqueId)]),
