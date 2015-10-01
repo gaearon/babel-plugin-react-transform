@@ -72,11 +72,11 @@ It must be an object with a `transforms` property being an array of the transfor
           }, {
             // can be an NPM module name or a local path
             "transform": "./src/my-custom-transform"
-          }]
-        },
-        // by default we only look for `React.createClass` (and ES6 classes)
-        // but you can tell the plugin to look for different component factories:
-        // factoryMethods: ["React.createClass", "createClass"]
+          }],
+          // by default we only look for `React.createClass` (and ES6 classes)
+          // but you can tell the plugin to look for different component factories:
+          // factoryMethods: ["React.createClass", "createClass"]
+        }
       }
     }
   }
