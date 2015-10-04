@@ -293,7 +293,7 @@ export default function ({ Plugin, types: t }) {
         }
       },
 
-      Function: {
+      "FunctionDeclaration|ArrowFunctionExpression": {
         enter(node, parent, scope, file) {
           if (!this.state[depthKey]) {
             this.state[depthKey] = 0;

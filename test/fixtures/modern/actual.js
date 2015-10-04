@@ -6,6 +6,12 @@ class LikelyComponent {
   render() {}
 }
 
+class ComponentWithJSX {
+  render() {
+    return <div />;
+  }
+}
+
 let Something = (Math.random() > .5) ?
   class ComponentInsideCondition { render() { } } :
   class AnotherComponentInsideCondition { render() { } };

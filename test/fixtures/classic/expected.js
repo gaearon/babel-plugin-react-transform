@@ -20,6 +20,9 @@ var _components = {
   _$A2: {
     displayName: 'A2'
   },
+  _$A3: {
+    displayName: 'A3'
+  },
   _$B: {
     displayName: 'B'
   },
@@ -96,6 +99,14 @@ var A2 = connect(twice(_wrapComponent('_$A2')(React.createClass({
 
   render: function render() {}
 }))));
+
+var A3 = _wrapComponent('_$A3')(React.createClass({
+  displayName: 'A3',
+
+  render: function render() {
+    return React.createElement('div', null);
+  }
+}));
 
 module.exports.B = _wrapComponent('_$B')(React.createClass({
   displayName: 'B',
