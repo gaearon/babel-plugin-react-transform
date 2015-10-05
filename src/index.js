@@ -91,9 +91,13 @@ export default function ({ Plugin, types: t }) {
   /**
    * Infers a displayName from either a class node, or a createClass() call node.
    */
-  function findDisplayName(node, parent) {
+  function findDisplayName(node, parent, scope, file) {
     if (node.id) {
       return node.id.name;
+    }
+    if (t.isExportDefaultDeclaration(parent) &&
+         (t.isArrowFunctionExpression(node) || t.isFunctionExpression(node))) {
+      return file.opts.basename;
     }
     if (t.isArrowFunctionExpression(node) && t.isVariableDeclarator(parent)) {
       return parent.id.name;
@@ -163,7 +167,7 @@ export default function ({ Plugin, types: t }) {
    * Such records will later be merged into a single object.
    */
   function createComponentRecord(node, parent, scope, file, state) {
-    const displayName = findDisplayName(node, parent) || undefined;
+    const displayName = findDisplayName(node, parent, scope, file) || undefined;
     const uniqueId = scope.generateUidIdentifier(
       '$' + (displayName || 'Unknown')
     ).name;
@@ -293,7 +297,7 @@ export default function ({ Plugin, types: t }) {
         }
       },
 
-      "FunctionDeclaration|ArrowFunctionExpression": {
+      'FunctionDeclaration|ArrowFunctionExpression': {
         enter(node, parent, scope, file) {
           if (!this.state[depthKey]) {
             this.state[depthKey] = 0;
@@ -314,7 +318,10 @@ export default function ({ Plugin, types: t }) {
           const uniqueId = addComponentRecord(node, parent, scope, file, this.state);
           const bindingId = node.id;
 
-          if (t.isArrowFunctionExpression(node) && t.isVariableDeclarator(parent)) {
+          if (t.isArrowFunctionExpression(node) &&
+             (t.isVariableDeclarator(parent) ||
+                t.isExportDefaultDeclaration(parent))
+          ) {
             return t.callExpression(
               t.callExpression(wrapReactComponentId, [t.literal(uniqueId)]),
               [node]

@@ -10,19 +10,27 @@ var _myOtherCustomModuleWrap2 = require('my-other-custom-module/wrap');
 
 var _myOtherCustomModuleWrap3 = _interopRequireDefault(_myOtherCustomModuleWrap2);
 
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
 var _react2 = _interopRequireDefault(_react);
 
 var _components = {
-  _$A: {
-    displayName: 'A',
+  _$DefaultFunction: {
+    displayName: 'DefaultFunction',
     isFunction: true
   },
-  _$B: {
-    displayName: 'B',
+  _$NamedExportFunction: {
+    displayName: 'NamedExportFunction',
     isFunction: true
   },
-  _$C: {
-    displayName: 'C',
+  _$DefaultExportFunction: {
+    displayName: 'DefaultExportFunction',
+    isFunction: true
+  },
+  _$actual: {
+    displayName: 'actual',
     isFunction: true
   }
 };
@@ -49,14 +57,22 @@ function _wrapComponent(uniqueId) {
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-function A() {
+function DefaultFunction() {
   return _react2['default'].createElement('div', null);
 }
 
-A = _wrapComponent('_$A')(A)
-var B = _wrapComponent('_$B')(function () {
+function NamedExportFunction() {
   return _react2['default'].createElement('div', null);
-});
-var C = _wrapComponent('_$C')(function () {
+}
+
+exports.NamedExportFunction = NamedExportFunction = _wrapComponent('_$NamedExportFunction')(NamedExportFunction)
+function DefaultExportFunction() {
+  return _react2['default'].createElement('div', null);
+}
+
+DefaultExportFunction = _wrapComponent('_$DefaultExportFunction')(DefaultExportFunction)
+exports.NamedExportFunction = NamedExportFunction;
+exports['default'] = DefaultExportFunction;
+exports['default'] = _wrapComponent('_$actual')(function () {
   return _react2['default'].createElement('div', null);
 });
