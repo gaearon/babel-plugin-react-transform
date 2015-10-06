@@ -95,6 +95,9 @@ export default function ({ Plugin, types: t }) {
     if (node.id) {
       return node.id.name;
     }
+    if (t.isFunctionExpression && t.isProperty(parent) && parent.key) {
+      return parent.key.name;
+    }
     if (t.isExportDefaultDeclaration(parent) &&
          (t.isArrowFunctionExpression(node) || t.isFunctionExpression(node))) {
       return file.opts.basename;
@@ -297,7 +300,7 @@ export default function ({ Plugin, types: t }) {
         }
       },
 
-      'FunctionDeclaration|ArrowFunctionExpression': {
+      'FunctionDeclaration|FunctionExpression|ArrowFunctionExpression': {
         enter(node, parent, scope, file) {
           if (!this.state[depthKey]) {
             this.state[depthKey] = 0;
@@ -312,16 +315,27 @@ export default function ({ Plugin, types: t }) {
             return;
           }
 
+          // No-op for `render` methods in this visitor
+          if (parent.key && parent.key.name === 'render') {
+            return;
+          }
+
           delete this.state[foundJSXKey];
 
           const wrapReactComponentId = this.state[wrapComponentIdKey];
           const uniqueId = addComponentRecord(node, parent, scope, file, this.state);
           const bindingId = node.id;
 
-          if (t.isArrowFunctionExpression(node) &&
-             (t.isVariableDeclarator(parent) ||
-                t.isExportDefaultDeclaration(parent))
-          ) {
+          if (t.isArrowFunctionExpression(node)) {
+            if (t.isVariableDeclarator(parent) || t.isExportDefaultDeclaration(parent)) {
+              return t.callExpression(
+                t.callExpression(wrapReactComponentId, [t.literal(uniqueId)]),
+                [node]
+              );
+            }
+          }
+
+          if (t.isFunctionExpression(node)) {
             return t.callExpression(
               t.callExpression(wrapReactComponentId, [t.literal(uniqueId)]),
               [node]

@@ -1,6 +1,6 @@
 import React from 'react';
 
-function DefaultFunction() {
+function FunctionDeclaration() {
   return <div />;
 }
 
@@ -11,6 +11,15 @@ function NamedExportFunction() {
 function DefaultExportFunction() {
   return <div />;
 }
+
+const ModulePattern = {
+  NoProps() {
+    return <div />;
+  },
+  WithProps(props) {
+    return <div {...props} />;
+  }
+};
 
 export { NamedExportFunction };
 export default DefaultExportFunction;

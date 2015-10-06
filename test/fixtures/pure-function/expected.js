@@ -17,8 +17,8 @@ Object.defineProperty(exports, '__esModule', {
 var _react2 = _interopRequireDefault(_react);
 
 var _components = {
-  _$DefaultFunction: {
-    displayName: 'DefaultFunction',
+  _$FunctionDeclaration: {
+    displayName: 'FunctionDeclaration',
     isFunction: true
   },
   _$NamedExportFunction: {
@@ -27,6 +27,14 @@ var _components = {
   },
   _$DefaultExportFunction: {
     displayName: 'DefaultExportFunction',
+    isFunction: true
+  },
+  _$NoProps: {
+    displayName: 'NoProps',
+    isFunction: true
+  },
+  _$WithProps: {
+    displayName: 'WithProps',
     isFunction: true
   },
   _$actual: {
@@ -57,10 +65,11 @@ function _wrapComponent(uniqueId) {
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-function DefaultFunction() {
+function FunctionDeclaration() {
   return _react2['default'].createElement('div', null);
 }
 
+FunctionDeclaration = _wrapComponent('_$FunctionDeclaration')(FunctionDeclaration)
 function NamedExportFunction() {
   return _react2['default'].createElement('div', null);
 }
@@ -69,8 +78,16 @@ exports.NamedExportFunction = NamedExportFunction = _wrapComponent('_$NamedExpor
 function DefaultExportFunction() {
   return _react2['default'].createElement('div', null);
 }
-
 DefaultExportFunction = _wrapComponent('_$DefaultExportFunction')(DefaultExportFunction)
+var ModulePattern = {
+  NoProps: _wrapComponent('_$NoProps')(function () {
+    return _react2['default'].createElement('div', null);
+  }),
+  WithProps: _wrapComponent('_$WithProps')(function (props) {
+    return _react2['default'].createElement('div', props);
+  })
+};
+
 exports.NamedExportFunction = NamedExportFunction;
 exports['default'] = DefaultExportFunction;
 exports['default'] = _wrapComponent('_$actual')(function () {
