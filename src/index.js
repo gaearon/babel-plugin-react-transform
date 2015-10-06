@@ -2,6 +2,7 @@ import path from 'path';
 import parsePath from 'path-parse';
 
 export default function ({ Plugin, types: t }) {
+
   const parentDir = path.resolve(path.join(__dirname, '..', '..'));
   function resolvePathConservatively(specifiedPath, filePath) {
     if (specifiedPath[0] === '.') {
@@ -88,13 +89,19 @@ export default function ({ Plugin, types: t }) {
   }
 
   /**
-   * Infers a displayName from either a class node, or a createClass() call node.
+   * Infers a displayName from either a class node, createClass() call, or a stateless component variable declaration
    */
-  function findDisplayName(node) {
+  function findDisplayName(node, parent) {
     if (node.id) {
       return node.id.name;
     }
+
     if (!node.arguments) {
+      // likely stateless function component. Check if assigned to a variable
+      if (parent.type === 'VariableDeclarator') {
+        return parent.id.name;
+      }
+
       return;
     }
     const props = node.arguments[0].properties;
@@ -158,8 +165,8 @@ export default function ({ Plugin, types: t }) {
    * Creates a record about us having visited a valid React component.
    * Such records will later be merged into a single object.
    */
-  function createComponentRecord(node, scope, file, state) {
-    const displayName = findDisplayName(node) || undefined;
+  function createComponentRecord(node, parent, scope, file, state) {
+    const displayName = findDisplayName(node, parent) || undefined;
     const uniqueId = scope.generateUidIdentifier(
       '$' + (displayName || 'Unknown')
     ).name;
@@ -185,8 +192,8 @@ export default function ({ Plugin, types: t }) {
    * Memorizes the fact that we have visited a valid component in the plugin state.
    * We will later retrieve memorized records to compose an object out of them.
    */
-  function addComponentRecord(node, scope, file, state) {
-    const [uniqueId, definition] = createComponentRecord(node, scope, file, state);
+  function addComponentRecord(node, parent, scope, file, state) {
+    const [uniqueId, definition] = createComponentRecord(node, parent, scope, file, state);
     state[recordsKey] = state[recordsKey] || [];
     state[recordsKey].push(t.property('init',
       t.identifier(uniqueId),
@@ -273,8 +280,60 @@ export default function ({ Plugin, types: t }) {
     );
   }
 
+  const statelessVisitorTypes = [
+    'ArrowFunctionExpression',
+    'FunctionDeclaration',
+    'FunctionExpression'
+  ].join('|');
+
   return new Plugin('babel-plugin-react-transform', {
     visitor: {
+      JSXElement(node, parent, scope, file) {
+        if (this.state.isStatelessComponent) {
+          return;
+        }
+
+        if (this.state.isPotentialStatelessComponent) {
+          delete this.state.isPotentialStatelessComponent;
+          this.state.isStatelessComponent = true;
+        }
+      },
+
+      [statelessVisitorTypes]: {
+        enter(node, parent, scope, file) {
+          if (node.body.type === 'JSXElement') {
+            this.state.isStatelessComponent = true;
+          } else {
+            this.state.isPotentialStatelessComponent = true;
+          }
+        },
+
+        exit(node, parent, scope, file) {
+          // prevent infinite loops due to returning a _wrapComponent call
+          if (
+            parent.type === 'CallExpression' &&
+            parent.callee.callee.name === '_wrapComponent'
+          ) {
+            return;
+          }
+
+          if (
+            typeof this.state === 'undefined' ||
+            !this.state.isStatelessComponent
+          ) {
+            return;
+          }
+
+          const wrapReactComponentId = this.state[wrapComponentIdKey];
+          const uniqueId = addComponentRecord(node, parent, scope, file, this.state);
+
+          return t.callExpression(
+            t.callExpression(wrapReactComponentId, [t.literal(uniqueId)]),
+            [node]
+          );
+        }
+      },
+
       Function: {
         enter(node, parent, scope, file) {
           if (!this.state[depthKey]) {
@@ -293,7 +352,7 @@ export default function ({ Plugin, types: t }) {
         }
 
         const wrapReactComponentId = this.state[wrapComponentIdKey];
-        const uniqueId = addComponentRecord(node, scope, file, this.state);
+        const uniqueId = addComponentRecord(node, parent, scope, file, this.state);
 
         node.decorators = node.decorators || [];
         node.decorators.push(t.decorator(
@@ -309,7 +368,7 @@ export default function ({ Plugin, types: t }) {
           }
 
           const wrapReactComponentId = this.state[wrapComponentIdKey];
-          const uniqueId = addComponentRecord(node, scope, file, this.state);
+          const uniqueId = addComponentRecord(node, parent, scope, file, this.state);
 
           return t.callExpression(
             t.callExpression(wrapReactComponentId, [t.literal(uniqueId)]),
