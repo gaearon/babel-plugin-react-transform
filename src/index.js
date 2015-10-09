@@ -315,6 +315,8 @@ export default function ({ Plugin, types: t }) {
             return;
           }
 
+          this.state[foundJSXKey] = false;
+
           // No-op for `render` methods in this visitor
           if (parent.key && parent.key.name === 'render') {
             return;
@@ -340,6 +342,10 @@ export default function ({ Plugin, types: t }) {
               t.callExpression(wrapReactComponentId, [t.literal(uniqueId)]),
               [node]
             );
+          }
+
+          if (t.isFunctionDeclaration(node)) {
+            // console.log(node.body.body.filter(t.isReturnStatement));
           }
 
           return [

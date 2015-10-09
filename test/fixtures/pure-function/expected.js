@@ -78,6 +78,7 @@ exports.NamedExportFunction = NamedExportFunction = _wrapComponent('_$NamedExpor
 function DefaultExportFunction() {
   return _react2['default'].createElement('div', null);
 }
+
 DefaultExportFunction = _wrapComponent('_$DefaultExportFunction')(DefaultExportFunction)
 var ModulePattern = {
   NoProps: _wrapComponent('_$NoProps')(function () {
