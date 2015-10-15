@@ -207,6 +207,7 @@ Don’t forget to tag it with `react-transform` keyword on npm.
 * **https://github.com/gaearon/react-transform-hmr**
 * **https://github.com/gaearon/react-transform-catch-errors**
 * **https://github.com/alexkuz/react-transform-debug-inspector**
+* **https://github.com/spredfast/react-transform-render-visualizer**
 * Feeling inspired? Send a PR!
 
 ## Discussion
