@@ -1,30 +1,4 @@
-import path from 'path';
-import parsePath from 'path-parse';
-
 export default function ({ Plugin, types: t }) {
-  const parentDir = path.resolve(path.join(__dirname, '..', '..'));
-  function resolvePathConservatively(specifiedPath, filePath) {
-    if (specifiedPath[0] === '.') {
-      throw new Error(
-        `Relative path like ${specifiedPath} is only allowed if ` +
-        `babel-plugin-react-transform is inside a node_modules folder.`
-      );
-    }
-    return specifiedPath;
-  }
-  function resolvePathAssumingWeAreInNodeModules(specifiedPath, filePath) {
-    if (specifiedPath[0] === '.') {
-      return '.' + path.sep + path.relative(
-        path.dirname(filePath),
-        path.resolve(path.join(parentDir, '..', specifiedPath))
-      );
-    }
-    return specifiedPath;
-  }
-  const resolvePath = path.basename(parentDir) === 'node_modules' ?
-    resolvePathAssumingWeAreInNodeModules :
-    resolvePathConservatively;
-
   const depthKey = '__reactTransformDepth';
   const recordsKey = '__reactTransformRecords';
   const wrapComponentIdKey = '__reactTransformWrapComponentId';
@@ -225,18 +199,9 @@ export default function ({ Plugin, types: t }) {
     const { transform, imports = [], locals = [] } = targetOptions;
     const { filename } = file.opts;
 
-    function isSameAsFileBeingProcessed(importPath) {
-      const { dir, base, ext, name } = parsePath(resolvePath(importPath, filename));
-      return dir === '.' && name === parsePath(filename).name;
-    }
-
-    if (imports.some(isSameAsFileBeingProcessed)) {
-      return;
-    }
-
     return [id, t.variableDeclaration('var', [
       t.variableDeclarator(id,
-        t.callExpression(file.addImport(resolvePath(transform, filename)), [
+        t.callExpression(file.addImport(transform), [
           t.objectExpression([
             t.property('init', t.identifier('filename'), t.literal(filename)),
             t.property('init', t.identifier('components'), recordsId),
@@ -244,7 +209,7 @@ export default function ({ Plugin, types: t }) {
               locals.map(local => t.identifier(local))
             )),
             t.property('init', t.identifier('imports'), t.arrayExpression(
-              imports.map(imp => file.addImport(resolvePath(imp, filename), imp, 'absolute'))
+              imports.map(imp => file.addImport(imp))
             ))
           ])
         ])
