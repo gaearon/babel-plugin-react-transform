@@ -209,7 +209,7 @@ export default function ({ Plugin, types: t }) {
               locals.map(local => t.identifier(local))
             )),
             t.property('init', t.identifier('imports'), t.arrayExpression(
-              imports.map(imp => file.addImport(imp))
+              imports.map(imp => file.addImport(imp, null, 'absolute'))
             ))
           ])
         ])
