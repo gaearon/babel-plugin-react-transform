@@ -72,11 +72,11 @@ It must be an object with a `transforms` property being an array of the transfor
           }, {
             // can be an NPM module name or a local path
             "transform": "./src/my-custom-transform"
-          }]
-        },
-        // by default we only look for `React.createClass` (and ES6 classes)
-        // but you can tell the plugin to look for different component factories:
-        // factoryMethods: ["React.createClass", "createClass"]
+          }],
+          // by default we only look for `React.createClass` (and ES6 classes)
+          // but you can tell the plugin to look for different component factories:
+          // factoryMethods: ["React.createClass", "createClass"]
+        }
       }
     }
   }
@@ -207,6 +207,7 @@ Don’t forget to tag it with `react-transform` keyword on npm.
 * **https://github.com/gaearon/react-transform-hmr**
 * **https://github.com/gaearon/react-transform-catch-errors**
 * **https://github.com/alexkuz/react-transform-debug-inspector**
+* **https://github.com/spredfast/react-transform-render-visualizer**
 * Feeling inspired? Send a PR!
 
 ## Discussion
