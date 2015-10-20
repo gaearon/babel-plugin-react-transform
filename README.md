@@ -212,7 +212,7 @@ Don’t forget to tag it with `react-transform` keyword on npm.
 
 ## Discussion
 
-You can discuss React Transform and related projects in **#react-transform** channel on [Reactiflux Slack](http://reactiflux.com).
+You can discuss React Transform and related projects in **#react-transform** channel on [Reactiflux](http://reactiflux.com).
 
 ## Patrons
 
