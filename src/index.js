@@ -123,6 +123,12 @@ export default function ({ Plugin, types: t }) {
         t.literal(displayName)
       ));
     }
+    if (node.loc !== undefined && node.loc.start !== undefined) {
+      props.push(t.property('init',
+        t.identifier('line'),
+        t.literal(node.loc.start.line)
+      ));
+    }
     if (state[depthKey] > 0) {
       props.push(t.property('init',
         t.identifier('isInFunction'),
