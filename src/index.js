@@ -230,7 +230,7 @@ export default function ({ types: t }) {
           const wrapReactComponentId = this.state[wrapComponentIdKey];
           const uniqueId = addComponentRecord(node, scope, file, this.state);
 
-          return t.callExpression(
+          t.callExpression(
             t.callExpression(wrapReactComponentId, [t.stringLiteral(uniqueId)]),
             [node]
           );
@@ -278,7 +278,7 @@ export default function ({ types: t }) {
           // Create one uber function calling each transformation
           const wrapComponentId = this.state[wrapComponentIdKey];
           const wrapComponent = defineWrapComponent(wrapComponentId, initTransformIds);
-          return t.program([
+          t.program([
             recordsVar,
             ...initTransformVars,
             wrapComponent,
