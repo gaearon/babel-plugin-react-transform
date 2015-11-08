@@ -87,7 +87,7 @@ export default function ({ types: t }) {
    * Creates a record about us having visited a valid React component.
    * Such records will later be merged into a single object.
    */
-  function createComponentRecord(node, scope, file, state) {
+  function createComponentRecord(node, scope, state) {
     const displayName = findDisplayName(node) || undefined;
     const uniqueId = scope.generateUidIdentifier(
       '$' + (displayName || 'Unknown')
@@ -114,8 +114,8 @@ export default function ({ types: t }) {
    * Memorizes the fact that we have visited a valid component in the plugin state.
    * We will later retrieve memorized records to compose an object out of them.
    */
-  function addComponentRecord(node, scope, file, state) {
-    const [uniqueId, definition] = createComponentRecord(node, scope, file, state);
+  function addComponentRecord(node, scope, state) {
+    const [uniqueId, definition] = createComponentRecord(node, scope, state);
     state[recordsKey] = state[recordsKey] || [];
     state[recordsKey].push(t.objectProperty(
       t.identifier(uniqueId),
@@ -149,13 +149,13 @@ export default function ({ types: t }) {
    * Imports and calls a particular transformation target function.
    * You may specify several such transformations, so they are handled separately.
    */
-  function defineInitTransformCall(scope, { file }, recordsId, targetOptions) {
+  function defineInitTransformCall(scope, file, recordsId, targetOptions) {
     const id = scope.generateUidIdentifier('reactComponentWrapper');
     const { transform, imports = [], locals = [] } = targetOptions;
     const { filename } = file.opts;
     return [id, t.variableDeclaration('var', [
       t.variableDeclarator(id,
-        t.callExpression(file.addImport(transform), [
+        t.callExpression(file.addImport(transform, 'default'), [
           t.objectExpression([
             t.objectProperty(t.identifier('filename'), t.stringLiteral(filename)),
             t.objectProperty(t.identifier('components'), recordsId),
@@ -163,7 +163,7 @@ export default function ({ types: t }) {
               locals.map(local => t.identifier(local))
             )),
             t.objectProperty(t.identifier('imports'), t.arrayExpression(
-              imports.map(imp => file.addImport(imp, null, 'absolute'))
+              imports.map(imp => file.addImport(imp, 'default', 'absolute'))
             ))
           ])
         ])
@@ -194,52 +194,69 @@ export default function ({ types: t }) {
 
   return {
     visitor: {
-      Function: {
-        enter({ node, parent, scope }, file) {
+      FunctionDeclaration: {
+        enter({ node, parent, scope }) {
           if (!this.state[depthKey]) {
             this.state[depthKey] = 0;
           }
           this.state[depthKey]++;
         },
-        exit({ node, parent, scope }, file) {
+        exit({ node, parent, scope }) {
           this.state[depthKey]--;
         }
       },
 
-      Class({ node, scope }, file) {
+      FunctionExpression: {
+        enter({ node, parent, scope }) {
+          if (!this.state[depthKey]) {
+            this.state[depthKey] = 0;
+          }
+          this.state[depthKey]++;
+        },
+        exit({ node, parent, scope }) {
+          this.state[depthKey]--;
+        }
+      },
+
+      ClassExpression(path) {
+        const {node, scope} = path;
         if (!isComponentishClass(node)) {
           return;
         }
 
         const wrapReactComponentId = this.state[wrapComponentIdKey];
-        const uniqueId = addComponentRecord(node, scope, file, this.state);
+        const uniqueId = addComponentRecord(node, scope, this.state);
 
         node.decorators = node.decorators || [];
         node.decorators.push(t.decorator(
-          t.callExpression(wrapReactComponentId, [t.stringLiteral(uniqueId)])
+          t.callExpression(wrapReactComponentId, [t.identifier(uniqueId)])
         ));
       },
 
       CallExpression: {
-        exit({ node, scope }, file) {
+        exit(path) {
+          const { node, scope } = path;
           const { isCreateClassCallExpression } = this.state[cacheKey];
-          if (!isCreateClass(node, isCreateClassCallExpression)) {
+          if (!isCreateClass(node, isCreateClassCallExpression) || node._reactTransformWrapped) {
             return;
           }
 
           const wrapReactComponentId = this.state[wrapComponentIdKey];
-          const uniqueId = addComponentRecord(node, scope, file, this.state);
+          const uniqueId = addComponentRecord(node, scope, this.state);
+          node._reactTransformWrapped = true;
 
-          t.callExpression(
-            t.callExpression(wrapReactComponentId, [t.stringLiteral(uniqueId)]),
-            [node]
+          path.replaceWith(
+            t.callExpression(
+              t.callExpression(wrapReactComponentId, [t.stringLiteral(uniqueId)]),
+              [node]
+            )
           );
         }
       },
 
       Program: {
-        enter({ scope }, file) {
-          const { opts } = file;
+        enter({ scope }, state) {
+          const { opts } = state;
           if (!isValidOptions(opts)) {
             throw new Error(
               'babel-plugin-react-transform requires that you specify options in .babelrc ' +
@@ -258,7 +275,8 @@ export default function ({ types: t }) {
           this.state[wrapComponentIdKey] = scope.generateUidIdentifier('wrapComponent');
         },
 
-        exit({ node, scope }, file) {
+        exit(path) {
+          const { node, scope, hub: {file} } = path;
           if (!foundComponentRecords(this.state)) {
             return;
           }
@@ -278,12 +296,12 @@ export default function ({ types: t }) {
           // Create one uber function calling each transformation
           const wrapComponentId = this.state[wrapComponentIdKey];
           const wrapComponent = defineWrapComponent(wrapComponentId, initTransformIds);
-          t.program([
+          path.replaceWith(t.program([
             recordsVar,
             ...initTransformVars,
             wrapComponent,
             ...node.body
-          ]);
+          ]));
         }
       }
     }
