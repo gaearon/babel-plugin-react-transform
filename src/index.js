@@ -194,19 +194,7 @@ export default function ({ types: t }) {
 
   return {
     visitor: {
-      FunctionDeclaration: {
-        enter({ node, parent, scope }) {
-          if (!this.state[depthKey]) {
-            this.state[depthKey] = 0;
-          }
-          this.state[depthKey]++;
-        },
-        exit({ node, parent, scope }) {
-          this.state[depthKey]--;
-        }
-      },
-
-      FunctionExpression: {
+      'FunctionDeclaration|FunctionExpression': {
         enter({ node, parent, scope }) {
           if (!this.state[depthKey]) {
             this.state[depthKey] = 0;
