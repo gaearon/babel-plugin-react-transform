@@ -1,14 +1,18 @@
 'use strict';
 
-var _myCustomModuleWrap2 = require('my-custom-module/wrap');
+var _wrap = require('my-other-custom-module/wrap');
 
-var _myCustomModuleWrap3 = _interopRequireDefault(_myCustomModuleWrap2);
+var _wrap2 = _interopRequireDefault(_wrap);
 
 var _react = require('react');
 
-var _myOtherCustomModuleWrap2 = require('my-other-custom-module/wrap');
+var _react2 = _interopRequireDefault(_react);
 
-var _myOtherCustomModuleWrap3 = _interopRequireDefault(_myOtherCustomModuleWrap2);
+var _wrap3 = require('my-custom-module/wrap');
+
+var _wrap4 = _interopRequireDefault(_wrap3);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var _components = {
   _$A: {
@@ -16,14 +20,14 @@ var _components = {
   }
 };
 
-var _reactComponentWrapper = (0, _myCustomModuleWrap3['default'])({
+var _reactComponentWrapper = (0, _wrap4.default)({
   filename: '%FIXTURE_PATH%',
   components: _components,
   locals: [module],
-  imports: [_react]
+  imports: [_react2.default]
 });
 
-var _reactComponentWrapper2 = (0, _myOtherCustomModuleWrap3['default'])({
+var _reactComponentWrapper2 = (0, _wrap2.default)({
   filename: '%FIXTURE_PATH%',
   components: _components,
   locals: [],
@@ -35,8 +39,6 @@ function _wrapComponent(uniqueId) {
     return _reactComponentWrapper2(_reactComponentWrapper(ReactClass, uniqueId), uniqueId);
   };
 }
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 var myComponentFactory = require('myComponentFactory');
 
