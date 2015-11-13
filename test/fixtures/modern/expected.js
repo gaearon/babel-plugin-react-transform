@@ -18,6 +18,9 @@ var _components = {
   _$LikelyComponent: {
     displayName: "LikelyComponent"
   },
+  _$ComponentWithJSX: {
+    displayName: "ComponentWithJSX"
+  },
   _$ComponentInsideCondition: {
     displayName: "ComponentInsideCondition"
   },
@@ -82,6 +85,23 @@ var LikelyComponent = (function () {
   var _LikelyComponent = LikelyComponent;
   LikelyComponent = _wrapComponent("_$LikelyComponent")(LikelyComponent) || LikelyComponent;
   return LikelyComponent;
+})();
+
+var ComponentWithJSX = (function () {
+  function ComponentWithJSX() {
+    _classCallCheck(this, _ComponentWithJSX);
+  }
+
+  _createClass(ComponentWithJSX, [{
+    key: "render",
+    value: function render() {
+      return React.createElement("div", null);
+    }
+  }]);
+
+  var _ComponentWithJSX = ComponentWithJSX;
+  ComponentWithJSX = _wrapComponent("_$ComponentWithJSX")(ComponentWithJSX) || ComponentWithJSX;
+  return ComponentWithJSX;
 })();
 
 var Something = Math.random() > .5 ? (function () {

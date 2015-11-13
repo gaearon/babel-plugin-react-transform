@@ -14,6 +14,14 @@ var A2 = connect(twice(React.createClass({
   render() {}
 })));
 
+var A3 = React.createClass({
+  displayName: 'A3',
+
+  render() {
+    return <div />;
+  }
+});
+
 module.exports.B = React.createClass({
   displayName: 'B',
 
