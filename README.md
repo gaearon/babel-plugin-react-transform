@@ -1,3 +1,8 @@
+># Babel 6 Not Supported Yet
+
+>We don’t support Babel 6 yet.  
+>If you’d like, you can [contribute to help make it happen](https://github.com/gaearon/babel-plugin-react-transform/issues/46).
+
 # babel-plugin-react-transform
 
 This Babel plugin wraps all React components into arbitrary transforms written by the community.  
