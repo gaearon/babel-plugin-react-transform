@@ -37,14 +37,14 @@ var _components = {
 };
 
 var _reactComponentWrapper = (0, _wrap4.default)({
-  filename: "/Users/daniel.delacruz/Desktop/projects/babel-plugin-react-transform/test/fixtures/modern/actual.js",
+  filename: "%FIXTURE_PATH%",
   components: _components,
   locals: [module],
   imports: [_react2.default]
 });
 
 var _reactComponentWrapper2 = (0, _wrap2.default)({
-  filename: "/Users/daniel.delacruz/Desktop/projects/babel-plugin-react-transform/test/fixtures/modern/actual.js",
+  filename: "%FIXTURE_PATH%",
   components: _components,
   locals: [],
   imports: []
