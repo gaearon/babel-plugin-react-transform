@@ -1,3 +1,9 @@
+import template from 'babel-template';
+
+const buildWrappedClass = template(`
+  (function(){ var CLASS_REF = CLASS; return DECORATOR(CLASS_REF) || CLASS_REF; })()
+`);
+
 export default function ({ types: t }) {
   const depthKey = '__reactTransformDepth';
   const recordsKey = '__reactTransformRecords';
@@ -208,17 +214,22 @@ export default function ({ types: t }) {
 
       ClassExpression(path) {
         const {node, scope} = path;
-        if (!isComponentishClass(node)) {
+        if (!isComponentishClass(node) || node._reactTransformWrapped) {
           return;
         }
 
         const wrapReactComponentId = this.state[wrapComponentIdKey];
         const uniqueId = addComponentRecord(node, scope, this.state);
+        node._reactTransformWrapped = true;
+        const ref = scope.generateUidIdentifierBasedOnNode(node.id);
 
-        node.decorators = node.decorators || [];
-        node.decorators.push(t.decorator(
-          t.callExpression(wrapReactComponentId, [t.identifier(uniqueId)])
-        ));
+        path.replaceWithMultiple([
+          buildWrappedClass({
+            CLASS: node,
+            CLASS_REF: ref,
+            DECORATOR: t.callExpression(wrapReactComponentId, [t.stringLiteral(uniqueId)]),
+          })
+        ]);
       },
 
       CallExpression: {

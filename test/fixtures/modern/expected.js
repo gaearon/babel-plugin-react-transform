@@ -72,66 +72,87 @@ var NotComponent = (function () {
 })();
 
 var LikelyComponent = (function () {
-  function LikelyComponent() {
-    _classCallCheck(this, LikelyComponent);
-  }
+  var _LikelyComponent = (function () {
+    function LikelyComponent() {
+      _classCallCheck(this, LikelyComponent);
+    }
 
-  _createClass(LikelyComponent, [{
-    key: "render",
-    value: function render() {}
-  }]);
+    _createClass(LikelyComponent, [{
+      key: "render",
+      value: function render() {}
+    }]);
 
-  return LikelyComponent;
+    return LikelyComponent;
+  })();
+
+  return _wrapComponent("_$LikelyComponent")(_LikelyComponent) || _LikelyComponent;
 })();
 
 var Something = Math.random() > .5 ? (function () {
-  function ComponentInsideCondition() {
-    _classCallCheck(this, ComponentInsideCondition);
-  }
+  var _ComponentInsideCondi = (function () {
+    function ComponentInsideCondition() {
+      _classCallCheck(this, ComponentInsideCondition);
+    }
 
-  _createClass(ComponentInsideCondition, [{
-    key: "render",
-    value: function render() {}
-  }]);
+    _createClass(ComponentInsideCondition, [{
+      key: "render",
+      value: function render() {}
+    }]);
 
-  return ComponentInsideCondition;
+    return ComponentInsideCondition;
+  })();
+
+  return _wrapComponent("_$ComponentInsideCondition")(_ComponentInsideCondi) || _ComponentInsideCondi;
 })() : (function () {
-  function AnotherComponentInsideCondition() {
-    _classCallCheck(this, AnotherComponentInsideCondition);
-  }
+  var _AnotherComponentInsi = (function () {
+    function AnotherComponentInsideCondition() {
+      _classCallCheck(this, AnotherComponentInsideCondition);
+    }
 
-  _createClass(AnotherComponentInsideCondition, [{
-    key: "render",
-    value: function render() {}
-  }]);
+    _createClass(AnotherComponentInsideCondition, [{
+      key: "render",
+      value: function render() {}
+    }]);
 
-  return AnotherComponentInsideCondition;
+    return AnotherComponentInsideCondition;
+  })();
+
+  return _wrapComponent("_$AnotherComponentInsideCondition")(_AnotherComponentInsi) || _AnotherComponentInsi;
 })();
 
 function factory() {
   var ComponentInsideFunction = (function () {
-    function ComponentInsideFunction() {
-      _classCallCheck(this, ComponentInsideFunction);
-    }
+    var _ComponentInsideFunct = (function () {
+      function ComponentInsideFunction() {
+        _classCallCheck(this, ComponentInsideFunction);
+      }
 
-    _createClass(ComponentInsideFunction, [{
-      key: "render",
-      value: function render() {}
-    }]);
+      _createClass(ComponentInsideFunction, [{
+        key: "render",
+        value: function render() {}
+      }]);
 
-    return ComponentInsideFunction;
+      return ComponentInsideFunction;
+    })();
+
+    return _wrapComponent("_$ComponentInsideFunction")(_ComponentInsideFunct) || _ComponentInsideFunct;
   })();
 
   return (function () {
-    function ComponentInsideFunction() {
-      _classCallCheck(this, ComponentInsideFunction);
-    }
+    var _ComponentInsideFunct2 = (function () {
+      function ComponentInsideFunction() {
+        _classCallCheck(this, ComponentInsideFunction);
+      }
 
-    _createClass(ComponentInsideFunction, [{
-      key: "render",
-      value: function render() {}
-    }]);
+      _createClass(ComponentInsideFunction, [{
+        key: "render",
+        value: function render() {}
+      }]);
 
-    return ComponentInsideFunction;
+      return ComponentInsideFunction;
+    })();
+
+    return _wrapComponent("_$ComponentInsideFunction2")(_ComponentInsideFunct2) || _ComponentInsideFunct2;
   })();
 }
+
