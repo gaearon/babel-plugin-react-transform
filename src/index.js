@@ -223,13 +223,13 @@ export default function ({ types: t }) {
         node._reactTransformWrapped = true;
         const ref = scope.generateUidIdentifierBasedOnNode(node.id);
 
-        path.replaceWithMultiple([
+        path.replaceWith(
           buildWrappedClass({
             CLASS: node,
             CLASS_REF: ref,
             DECORATOR: t.callExpression(wrapReactComponentId, [t.stringLiteral(uniqueId)]),
           })
-        ]);
+        );
       },
 
       CallExpression: {
