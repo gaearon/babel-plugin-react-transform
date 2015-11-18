@@ -1,4 +1,10 @@
-export default function ({ Plugin, types: t }) {
+import template from 'babel-template';
+
+const buildWrappedClass = template(`
+  (function(){ var CLASS_REF = CLASS; return DECORATOR(CLASS_REF) || CLASS_REF; })()
+`);
+
+export default function ({ types: t }) {
   const depthKey = '__reactTransformDepth';
   const recordsKey = '__reactTransformRecords';
   const wrapComponentIdKey = '__reactTransformWrapComponentId';
@@ -55,10 +61,7 @@ export default function ({ Plugin, types: t }) {
       return false;
     }
     const first = args[0];
-    if (!t.isObjectExpression(first)) {
-      return false;
-    }
-    return true;
+    return t.isObjectExpression(first);
   }
 
   /**
@@ -87,30 +90,10 @@ export default function ({ Plugin, types: t }) {
   }
 
   /**
-   * Enforces plugin options to be defined and returns them.
-   */
-  function getPluginOptions(file) {
-    if (!file.opts || !file.opts.extra) {
-      return;
-    }
-
-    let pluginOptions = file.opts.extra['react-transform'];
-    if (!isValidOptions(pluginOptions)) {
-      throw new Error(
-        'babel-plugin-react-transform requires that you specify ' +
-        'extras["react-transform"] in .babelrc ' +
-        'or in your Babel Node API call options, and that it is an object with ' +
-        'a transforms property which is an array.'
-      );
-    }
-    return pluginOptions;
-  }
-
-  /**
    * Creates a record about us having visited a valid React component.
    * Such records will later be merged into a single object.
    */
-  function createComponentRecord(node, scope, file, state) {
+  function createComponentRecord(node, scope, state) {
     const displayName = findDisplayName(node) || undefined;
     const uniqueId = scope.generateUidIdentifier(
       '$' + (displayName || 'Unknown')
@@ -118,15 +101,15 @@ export default function ({ Plugin, types: t }) {
 
     let props = [];
     if (typeof displayName === 'string') {
-      props.push(t.property('init',
+      props.push(t.objectProperty(
         t.identifier('displayName'),
-        t.literal(displayName)
+        t.stringLiteral(displayName)
       ));
     }
     if (state[depthKey] > 0) {
-      props.push(t.property('init',
+      props.push(t.objectProperty(
         t.identifier('isInFunction'),
-        t.literal(true)
+        t.booleanLiteral(true)
       ));
     }
 
@@ -137,10 +120,10 @@ export default function ({ Plugin, types: t }) {
    * Memorizes the fact that we have visited a valid component in the plugin state.
    * We will later retrieve memorized records to compose an object out of them.
    */
-  function addComponentRecord(node, scope, file, state) {
-    const [uniqueId, definition] = createComponentRecord(node, scope, file, state);
+  function addComponentRecord(node, scope, state) {
+    const [uniqueId, definition] = createComponentRecord(node, scope, state);
     state[recordsKey] = state[recordsKey] || [];
-    state[recordsKey].push(t.property('init',
+    state[recordsKey].push(t.objectProperty(
       t.identifier(uniqueId),
       definition
     ));
@@ -176,18 +159,17 @@ export default function ({ Plugin, types: t }) {
     const id = scope.generateUidIdentifier('reactComponentWrapper');
     const { transform, imports = [], locals = [] } = targetOptions;
     const { filename } = file.opts;
-
     return [id, t.variableDeclaration('var', [
       t.variableDeclarator(id,
-        t.callExpression(file.addImport(transform), [
+        t.callExpression(file.addImport(transform, 'default'), [
           t.objectExpression([
-            t.property('init', t.identifier('filename'), t.literal(filename)),
-            t.property('init', t.identifier('components'), recordsId),
-            t.property('init', t.identifier('locals'), t.arrayExpression(
+            t.objectProperty(t.identifier('filename'), t.stringLiteral(filename)),
+            t.objectProperty(t.identifier('components'), recordsId),
+            t.objectProperty(t.identifier('locals'), t.arrayExpression(
               locals.map(local => t.identifier(local))
             )),
-            t.property('init', t.identifier('imports'), t.arrayExpression(
-              imports.map(imp => file.addImport(imp, null, 'absolute'))
+            t.objectProperty(t.identifier('imports'), t.arrayExpression(
+              imports.map(imp => file.addImport(imp, 'default', 'absolute'))
             ))
           ])
         ])
@@ -216,56 +198,75 @@ export default function ({ Plugin, types: t }) {
     );
   }
 
-  return new Plugin('babel-plugin-react-transform', {
+  return {
     visitor: {
-      Function: {
-        enter(node, parent, scope, file) {
+      'FunctionDeclaration|FunctionExpression': {
+        enter({ node, parent, scope }) {
           if (!this.state[depthKey]) {
             this.state[depthKey] = 0;
           }
           this.state[depthKey]++;
         },
-        exit(node, parent, scope, file) {
+        exit({ node, parent, scope }) {
           this.state[depthKey]--;
         }
       },
 
-      Class(node, parent, scope, file) {
-        if (!isComponentishClass(node)) {
+      ClassExpression(path) {
+        const {node, scope} = path;
+        if (!isComponentishClass(node) || node._reactTransformWrapped) {
           return;
         }
 
         const wrapReactComponentId = this.state[wrapComponentIdKey];
-        const uniqueId = addComponentRecord(node, scope, file, this.state);
+        const uniqueId = addComponentRecord(node, scope, this.state);
+        node._reactTransformWrapped = true;
+        const ref = scope.generateUidIdentifierBasedOnNode(node.id);
 
-        node.decorators = node.decorators || [];
-        node.decorators.push(t.decorator(
-          t.callExpression(wrapReactComponentId, [t.literal(uniqueId)])
-        ));
+        path.replaceWith(
+          buildWrappedClass({
+            CLASS: node,
+            CLASS_REF: ref,
+            DECORATOR: t.callExpression(wrapReactComponentId, [t.stringLiteral(uniqueId)]),
+          })
+        );
       },
 
       CallExpression: {
-        exit(node, parent, scope, file) {
+        exit(path) {
+          const { node, scope } = path;
           const { isCreateClassCallExpression } = this.state[cacheKey];
-          if (!isCreateClass(node, isCreateClassCallExpression)) {
+          if (!isCreateClass(node, isCreateClassCallExpression) || node._reactTransformWrapped) {
             return;
           }
 
           const wrapReactComponentId = this.state[wrapComponentIdKey];
-          const uniqueId = addComponentRecord(node, scope, file, this.state);
+          const uniqueId = addComponentRecord(node, scope, this.state);
+          node._reactTransformWrapped = true;
 
-          return t.callExpression(
-            t.callExpression(wrapReactComponentId, [t.literal(uniqueId)]),
-            [node]
+          path.replaceWith(
+            t.callExpression(
+              t.callExpression(wrapReactComponentId, [t.stringLiteral(uniqueId)]),
+              [node]
+            )
           );
         }
       },
 
       Program: {
-        enter(node, parent, scope, file) {
-          const options = getPluginOptions(file);
-          const factoryMethods = options.factoryMethods || ['React.createClass', 'createClass'];
-          this.state[optionsKey] = options;
+        enter({ scope }, state) {
+          const { opts } = state;
+          if (!isValidOptions(opts)) {
+            throw new Error(
+              'babel-plugin-react-transform requires that you specify options in .babelrc ' +
+              'or in your Babel Node API call options, and that it is an object with ' +
+              'a transforms property which is an array.'
+            );
+          }
+          const factoryMethods = opts.factoryMethods || ['React.createClass', 'createClass'];
+
+          this.state = {};
+          this.state[optionsKey] = opts;
           this.state[cacheKey] = {
             isCreateClassCallExpression: buildIsCreateClassCallExpression(factoryMethods),
           };
@@ -273,7 +274,8 @@ export default function ({ Plugin, types: t }) {
           this.state[wrapComponentIdKey] = scope.generateUidIdentifier('wrapComponent');
         },
 
-        exit(node, parent, scope, file) {
+        exit(path) {
+          const { node, scope, hub: {file} } = path;
           if (!foundComponentRecords(this.state)) {
             return;
           }
@@ -293,15 +295,14 @@ export default function ({ Plugin, types: t }) {
           // Create one uber function calling each transformation
           const wrapComponentId = this.state[wrapComponentIdKey];
           const wrapComponent = defineWrapComponent(wrapComponentId, initTransformIds);
-
-          return t.program([
+          path.replaceWith(t.program([
             recordsVar,
             ...initTransformVars,
             wrapComponent,
             ...node.body
-          ]);
+          ]));
         }
       }
     }
-  });
+  };
 }

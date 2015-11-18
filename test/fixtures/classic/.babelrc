@@ -1,7 +1,7 @@
 {
-  "plugins": ["../../../src"],
-  "extra": {
-    "react-transform": {
+  "presets": ["es2015"],
+  "plugins": [
+    ["../../../src", {
       "transforms": [{
         "transform": "my-custom-module/wrap",
         "locals": ["module"],
@@ -9,6 +9,6 @@
       }, {
         "transform": "my-other-custom-module/wrap"
       }]
-    }
-  }
+    }]
+  ]
 }

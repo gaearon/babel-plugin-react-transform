@@ -1,18 +1,20 @@
 "use strict";
 
-var _myCustomModuleWrap2 = require("my-custom-module/wrap");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _myCustomModuleWrap3 = _interopRequireDefault(_myCustomModuleWrap2);
+var _wrap = require("my-other-custom-module/wrap");
+
+var _wrap2 = _interopRequireDefault(_wrap);
 
 var _react = require("react");
 
-var _myOtherCustomModuleWrap2 = require("my-other-custom-module/wrap");
+var _react2 = _interopRequireDefault(_react);
 
-var _myOtherCustomModuleWrap3 = _interopRequireDefault(_myOtherCustomModuleWrap2);
+var _wrap3 = require("my-custom-module/wrap");
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _wrap4 = _interopRequireDefault(_wrap3);
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var _components = {
   _$LikelyComponent: {
@@ -34,14 +36,14 @@ var _components = {
   }
 };
 
-var _reactComponentWrapper = (0, _myCustomModuleWrap3["default"])({
+var _reactComponentWrapper = (0, _wrap4.default)({
   filename: "%FIXTURE_PATH%",
   components: _components,
   locals: [module],
-  imports: [_react]
+  imports: [_react2.default]
 });
 
-var _reactComponentWrapper2 = (0, _myOtherCustomModuleWrap3["default"])({
+var _reactComponentWrapper2 = (0, _wrap2.default)({
   filename: "%FIXTURE_PATH%",
   components: _components,
   locals: [],
@@ -54,7 +56,7 @@ function _wrapComponent(uniqueId) {
   };
 }
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var NotComponent = (function () {
   function NotComponent() {
@@ -70,76 +72,87 @@ var NotComponent = (function () {
 })();
 
 var LikelyComponent = (function () {
-  function LikelyComponent() {
-    _classCallCheck(this, _LikelyComponent);
-  }
+  var _LikelyComponent = (function () {
+    function LikelyComponent() {
+      _classCallCheck(this, LikelyComponent);
+    }
 
-  _createClass(LikelyComponent, [{
-    key: "render",
-    value: function render() {}
-  }]);
+    _createClass(LikelyComponent, [{
+      key: "render",
+      value: function render() {}
+    }]);
 
-  var _LikelyComponent = LikelyComponent;
-  LikelyComponent = _wrapComponent("_$LikelyComponent")(LikelyComponent) || LikelyComponent;
-  return LikelyComponent;
+    return LikelyComponent;
+  })();
+
+  return _wrapComponent("_$LikelyComponent")(_LikelyComponent) || _LikelyComponent;
 })();
 
 var Something = Math.random() > .5 ? (function () {
-  function ComponentInsideCondition() {
-    _classCallCheck(this, _ComponentInsideCondition);
-  }
+  var _ComponentInsideCondi = (function () {
+    function ComponentInsideCondition() {
+      _classCallCheck(this, ComponentInsideCondition);
+    }
 
-  _createClass(ComponentInsideCondition, [{
-    key: "render",
-    value: function render() {}
-  }]);
+    _createClass(ComponentInsideCondition, [{
+      key: "render",
+      value: function render() {}
+    }]);
 
-  var _ComponentInsideCondition = ComponentInsideCondition;
-  ComponentInsideCondition = _wrapComponent("_$ComponentInsideCondition")(ComponentInsideCondition) || ComponentInsideCondition;
-  return ComponentInsideCondition;
+    return ComponentInsideCondition;
+  })();
+
+  return _wrapComponent("_$ComponentInsideCondition")(_ComponentInsideCondi) || _ComponentInsideCondi;
 })() : (function () {
-  function AnotherComponentInsideCondition() {
-    _classCallCheck(this, _AnotherComponentInsideCondition);
-  }
+  var _AnotherComponentInsi = (function () {
+    function AnotherComponentInsideCondition() {
+      _classCallCheck(this, AnotherComponentInsideCondition);
+    }
 
-  _createClass(AnotherComponentInsideCondition, [{
-    key: "render",
-    value: function render() {}
-  }]);
+    _createClass(AnotherComponentInsideCondition, [{
+      key: "render",
+      value: function render() {}
+    }]);
 
-  var _AnotherComponentInsideCondition = AnotherComponentInsideCondition;
-  AnotherComponentInsideCondition = _wrapComponent("_$AnotherComponentInsideCondition")(AnotherComponentInsideCondition) || AnotherComponentInsideCondition;
-  return AnotherComponentInsideCondition;
+    return AnotherComponentInsideCondition;
+  })();
+
+  return _wrapComponent("_$AnotherComponentInsideCondition")(_AnotherComponentInsi) || _AnotherComponentInsi;
 })();
 
 function factory() {
   var ComponentInsideFunction = (function () {
-    function ComponentInsideFunction() {
-      _classCallCheck(this, _ComponentInsideFunction);
-    }
+    var _ComponentInsideFunct = (function () {
+      function ComponentInsideFunction() {
+        _classCallCheck(this, ComponentInsideFunction);
+      }
 
-    _createClass(ComponentInsideFunction, [{
-      key: "render",
-      value: function render() {}
-    }]);
+      _createClass(ComponentInsideFunction, [{
+        key: "render",
+        value: function render() {}
+      }]);
 
-    var _ComponentInsideFunction = ComponentInsideFunction;
-    ComponentInsideFunction = _wrapComponent("_$ComponentInsideFunction")(ComponentInsideFunction) || ComponentInsideFunction;
-    return ComponentInsideFunction;
+      return ComponentInsideFunction;
+    })();
+
+    return _wrapComponent("_$ComponentInsideFunction")(_ComponentInsideFunct) || _ComponentInsideFunct;
   })();
 
   return (function () {
-    function ComponentInsideFunction() {
-      _classCallCheck(this, _ComponentInsideFunction2);
-    }
+    var _ComponentInsideFunct2 = (function () {
+      function ComponentInsideFunction() {
+        _classCallCheck(this, ComponentInsideFunction);
+      }
 
-    _createClass(ComponentInsideFunction, [{
-      key: "render",
-      value: function render() {}
-    }]);
+      _createClass(ComponentInsideFunction, [{
+        key: "render",
+        value: function render() {}
+      }]);
 
-    var _ComponentInsideFunction2 = ComponentInsideFunction;
-    ComponentInsideFunction = _wrapComponent("_$ComponentInsideFunction2")(ComponentInsideFunction) || ComponentInsideFunction;
-    return ComponentInsideFunction;
+      return ComponentInsideFunction;
+    })();
+
+    return _wrapComponent("_$ComponentInsideFunction2")(_ComponentInsideFunct2) || _ComponentInsideFunct2;
   })();
 }
+
