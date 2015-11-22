@@ -15,7 +15,7 @@ Such transforms can do a variety of things:
 * render an inline prop inspector like **[react-transform-debug-inspector](https://github.com/alexkuz/react-transform-debug-inspector)**;
 * highlight parts of the screen when components update like
 **[react-transform-render-visualizer](https://github.com/spredfast/react-transform-render-visualizer)**;
-* etc.
+* [etc](https://www.npmjs.com/browse/keyword/react-transform).
 
 The limit is your imagination and the time you feel compelled to spend on writing these transforms.  
 Time will show whether it is an amazing, or a terrible idea.
@@ -204,7 +204,7 @@ export default function logAllUpdates(options) {
 ```
 
 Now go ahead and write your own!  
-Don’t forget to tag it with `react-transform` keyword on npm.
+Don’t forget to tag it with `react-transform` [keyword on npm](https://www.npmjs.com/browse/keyword/react-transform).
 
 ## Ecosystem
 
