@@ -5,6 +5,15 @@ export default function({ types: t, template }) {
     return name || 'Unknown' + _uniqueComponentId++;
   }
 
+  function matchesPatterns(path, patterns) {
+    return !!patterns.find(pattern => {
+      return (
+        t.isIdentifier(path.node, { name: pattern }) ||
+        path.matchesPattern(pattern)
+      );
+    });
+  }
+
   function isReactLikeClass(node) {
     return !!node.body.body.find(classMember => {
       return (
@@ -105,7 +114,7 @@ export default function({ types: t, template }) {
     CallExpression(path) {
       if (
         path.node[VISITED_KEY] ||
-        !path.get('callee').matchesPattern('React.createClass') &&
+        !matchesPatterns(path.get('callee'), this.factoryMethods) &&
         !isReactLikeComponentObject(path.node.arguments[0])
       ) {
         return;
@@ -156,6 +165,7 @@ export default function({ types: t, template }) {
 
     normalizeOptions(options) {
       return {
+        factoryMethods: options.factoryMethods || ['React.createClass'],
         transforms: options.transforms.map(opts => {
           return {
             transform: opts.transform,
@@ -200,6 +210,7 @@ export default function({ types: t, template }) {
       this.file.path.traverse(componentVisitor, {
         wrapperFunctionId: wrapperFunctionId,
         components: components,
+        factoryMethods: this.options.factoryMethods,
         currentlyInFunction: false
       });
 
