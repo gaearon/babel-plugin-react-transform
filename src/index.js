@@ -78,7 +78,7 @@ export default function({ types: t, template }) {
     Class(path) {
       if (
         path.node[VISITED_KEY] ||
-        !path.get('superClass').matchesPattern('React.Component') &&
+        !matchesPatterns(path.get('superClass'), this.superClasses) &&
         !isReactLikeClass(path.node)
       ) {
         return;
@@ -166,6 +166,7 @@ export default function({ types: t, template }) {
     normalizeOptions(options) {
       return {
         factoryMethods: options.factoryMethods || ['React.createClass'],
+        superClasses: options.superClasses || ['React.Component'],
         transforms: options.transforms.map(opts => {
           return {
             transform: opts.transform,
@@ -211,6 +212,7 @@ export default function({ types: t, template }) {
         wrapperFunctionId: wrapperFunctionId,
         components: components,
         factoryMethods: this.options.factoryMethods,
+        superClasses: this.options.superClasses,
         currentlyInFunction: false
       });
 
