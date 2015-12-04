@@ -66,6 +66,11 @@ export default function({ types: t, template }) {
     return t.objectExpression(properties);
   }
 
+  function classDeclarationToClassExpression(node) {
+    if (t.isClassDeclaration) node.type = 'ClassExpression';
+    return node;
+  }
+
   const wrapperFunctionTemplate = template(`
     function WRAPPER_FUNCTION_ID(ID_PARAM) {
       return function(COMPONENT_PARAM) {
@@ -98,10 +103,15 @@ export default function({ types: t, template }) {
         isInFunction: isInFunction
       });
 
-      let wrapped = wrapComponent(path.node, componentId, this.wrapperFunctionId);
+      // Can't wrap ClassDeclarations
+      let wasClassDeclaration = t.isClassDeclaration(path.node);
+      let expression = classDeclarationToClassExpression(path.node);
 
-      if (t.isStatement(path.node)) {
-        // wrapper(class Foo ...) => const Foo = wrapper(class Foo ...)
+      // wrapperFunction("componentId")(node)
+      let wrapped = wrapComponent(expression, componentId, this.wrapperFunctionId);
+
+      if (wasClassDeclaration) {
+        // wrapperFunction("componentId")(class Foo ...) => const Foo = wrapperFunction("componentId")(class Foo ...)
         wrapped = t.variableDeclaration('const', [
           t.variableDeclarator(
             t.identifier(componentName),
@@ -176,7 +186,7 @@ export default function({ types: t, template }) {
             imports: opts.imports || []
           };
         })
-      }
+      };
     }
 
     build() {
