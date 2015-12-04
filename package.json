@@ -40,5 +40,7 @@
     "reactjs",
     "components"
   ],
-  "dependencies": {}
+  "dependencies": {
+    "array-find": "^1.0.0"
+  }
 }

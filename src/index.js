@@ -1,3 +1,5 @@
+import find from 'array-find';
+
 export default function({ types: t, template }) {
   let _uniqueComponentId = 0;
 
@@ -6,7 +8,7 @@ export default function({ types: t, template }) {
   }
 
   function matchesPatterns(path, patterns) {
-    return !!patterns.find(pattern => {
+    return !!find(patterns, pattern => {
       return (
         t.isIdentifier(path.node, { name: pattern }) ||
         path.matchesPattern(pattern)
@@ -15,7 +17,7 @@ export default function({ types: t, template }) {
   }
 
   function isReactLikeClass(node) {
-    return !!node.body.body.find(classMember => {
+    return !!find(node.body.body, classMember => {
       return (
         t.isClassMethod(classMember) &&
         t.isIdentifier(classMember.key, { name: 'render' })
@@ -24,7 +26,7 @@ export default function({ types: t, template }) {
   }
 
   function isReactLikeComponentObject(node) {
-    return t.isObjectExpression(node) && !!node.properties.find(objectMember => {
+    return t.isObjectExpression(node) && !!find(node.properties, objectMember => {
       return (
         t.isObjectProperty(objectMember) ||
         t.isObjectMethod(objectMember)
@@ -37,7 +39,7 @@ export default function({ types: t, template }) {
 
   // `foo({ displayName: 'NAME' });` => 'NAME'
   function getDisplayName(node) {
-    const property = node.arguments[0].properties.find(node => node.key.name === 'displayName');
+    const property = find(node.arguments[0].properties, node => node.key.name === 'displayName');
     return property && property.value.value;
   }
 
