@@ -66,11 +66,6 @@ export default function({ types: t, template }) {
     return t.objectExpression(properties);
   }
 
-  function classDeclarationToClassExpression(node) {
-    if (t.isClassDeclaration(node)) node.type = 'ClassExpression';
-    return node;
-  }
-
   const wrapperFunctionTemplate = template(`
     function WRAPPER_FUNCTION_ID(ID_PARAM) {
       return function(COMPONENT_PARAM) {
@@ -104,13 +99,13 @@ export default function({ types: t, template }) {
       });
 
       // Can't wrap ClassDeclarations
-      let wasClassDeclaration = t.isClassDeclaration(path.node);
-      let expression = classDeclarationToClassExpression(path.node);
+      const isStatement = t.isStatement(path.node);
+      const expression = t.toExpression(path.node);
 
       // wrapperFunction("componentId")(node)
       let wrapped = wrapComponent(expression, componentId, this.wrapperFunctionId);
 
-      if (wasClassDeclaration) {
+      if (isStatement) {
         // wrapperFunction("componentId")(class Foo ...) => const Foo = wrapperFunction("componentId")(class Foo ...)
         wrapped = t.variableDeclaration('const', [
           t.variableDeclarator(
