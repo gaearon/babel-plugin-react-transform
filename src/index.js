@@ -67,7 +67,7 @@ export default function({ types: t, template }) {
   }
 
   function classDeclarationToClassExpression(node) {
-    if (t.isClassDeclaration) node.type = 'ClassExpression';
+    if (t.isClassDeclaration(node)) node.type = 'ClassExpression';
     return node;
   }
 
