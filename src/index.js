@@ -1,12 +1,6 @@
 import find from 'array-find';
 
 export default function({ types: t, template }) {
-  let _uniqueComponentId = 0;
-
-  function toComponentId(name) {
-    return name || 'Unknown' + _uniqueComponentId++;
-  }
-
   function matchesPatterns(path, patterns) {
     return !!find(patterns, pattern => {
       return (
@@ -89,7 +83,7 @@ export default function({ types: t, template }) {
       path.node[VISITED_KEY] = true;
 
       const componentName = path.node.id && path.node.id.name || null;
-      const componentId = toComponentId(componentName);
+      const componentId = componentName || path.scope.generateUid('component');
       const isInFunction = hasParentFunction(path);
 
       this.components.push({
@@ -104,18 +98,22 @@ export default function({ types: t, template }) {
 
       // wrapperFunction("componentId")(node)
       let wrapped = wrapComponent(expression, componentId, this.wrapperFunctionId);
+      let constId;
 
       if (isStatement) {
         // wrapperFunction("componentId")(class Foo ...) => const Foo = wrapperFunction("componentId")(class Foo ...)
+        constId = t.identifier(componentName || componentId);
         wrapped = t.variableDeclaration('const', [
-          t.variableDeclarator(
-            t.identifier(componentName),
-            wrapped
-          )
+          t.variableDeclarator(constId, wrapped)
         ]);
       }
 
-      path.replaceWith(wrapped);
+      if (t.isExportDefaultDeclaration(path.parent)) {
+        path.parentPath.insertBefore(wrapped);
+        path.parent.declaration = constId;
+      } else {
+        path.replaceWith(wrapped);
+      }
     },
 
     CallExpression(path) {
@@ -131,7 +129,7 @@ export default function({ types: t, template }) {
 
       // `foo({ displayName: 'NAME' });` => 'NAME'
       const componentName = getDisplayName(path.node);
-      const componentId = toComponentId(componentName);
+      const componentId = componentName || path.scope.generateUid('component');
       const isInFunction = hasParentFunction(path);
 
       this.components.push({
@@ -331,10 +329,6 @@ export default function({ types: t, template }) {
   }
 
   return {
-    pre() {
-      // reset for each run
-      _uniqueComponentId = 0;
-    },
     visitor: {
       Program(path, { file, opts }) {
         ReactTransformBuilder.assertValidOptions(opts);

@@ -2,7 +2,8 @@ import _transformLib from "transform-lib";
 const _components = {
   Foo: {
     displayName: "Foo"
-  }
+  },
+  _component: {}
 };
 
 const _transformLib2 = _transformLib({
@@ -19,3 +20,4 @@ function _wrapComponent(id) {
 }
 
 foo(_wrapComponent("Foo")(class Foo extends React.Component {}));
+foo(_wrapComponent("_component")(class extends React.Component {}));

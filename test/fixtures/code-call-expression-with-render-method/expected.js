@@ -1,8 +1,8 @@
 import _transformLib from 'transform-lib';
 const _components = {
-  Unknown0: {},
-  Unknown1: {},
-  Unknown2: {}
+  _component: {},
+  _component2: {},
+  _component3: {}
 };
 
 const _transformLib2 = _transformLib({
@@ -18,14 +18,14 @@ function _wrapComponent(id) {
   };
 }
 
-_wrapComponent('Unknown0')(factory({
+_wrapComponent('_component')(factory({
   render() {}
 }));
 
-_wrapComponent('Unknown1')(factory({
+_wrapComponent('_component2')(factory({
   render: function () {}
 }));
 
-_wrapComponent('Unknown2')(factory({
+_wrapComponent('_component3')(factory({
   'render': function () {}
 }));

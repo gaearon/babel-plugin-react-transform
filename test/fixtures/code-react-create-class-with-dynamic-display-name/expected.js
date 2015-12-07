@@ -1,6 +1,6 @@
 import _transformLib from "transform-lib";
 const _components = {
-  Unknown0: {}
+  _component: {}
 };
 
 const _transformLib2 = _transformLib({
@@ -16,6 +16,6 @@ function _wrapComponent(id) {
   };
 }
 
-const Foo = _wrapComponent("Unknown0")(React.createClass({
+const Foo = _wrapComponent("_component")(React.createClass({
   displayName: Math.random()
 }));

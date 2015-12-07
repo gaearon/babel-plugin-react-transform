@@ -2,7 +2,8 @@ import _transformLib from 'transform-lib';
 const _components = {
   Foo: {
     displayName: 'Foo'
-  }
+  },
+  _component: {}
 };
 
 const _transformLib2 = _transformLib({
@@ -21,3 +22,5 @@ function _wrapComponent(id) {
 const Foo = _wrapComponent('Foo')(React.createClass({
   displayName: 'Foo'
 }));
+
+_wrapComponent('_component')(React.createClass({}));
