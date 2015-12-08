@@ -205,7 +205,7 @@ export default function logAllUpdates(options) {
 }
 ```
 
-Now go ahead and write your own! Don’t forget to tag it with `react-transform` keyword on npm.
+Now go ahead and write your own! Don’t forget to tag it with `react-transform` [keyword on npm](https://www.npmjs.com/browse/keyword/react-transform).
 
 ## Patrons
 
