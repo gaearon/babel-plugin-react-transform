@@ -1,28 +1,30 @@
-># Babel 6 Not Supported Yet
-
->We don’t support Babel 6 yet.  
->If you’d like, you can [contribute to help make it happen](https://github.com/gaearon/babel-plugin-react-transform/issues/46).
-
 # babel-plugin-react-transform
-
-This Babel plugin wraps all React components into arbitrary transforms written by the community.  
-In other words, **it lets you instrument React components** in any custom way.
-
-Such transforms can do a variety of things:
-
-* catch errors inside `render()` like **[react-transform-catch-errors](https://github.com/gaearon/react-transform-catch-errors)**;
-* enable hot reloading like **[react-transform-hmr](https://github.com/gaearon/react-transform-hmr)**;
-* render an inline prop inspector like **[react-transform-debug-inspector](https://github.com/alexkuz/react-transform-debug-inspector)**;
-* highlight parts of the screen when components update like
-**[react-transform-render-visualizer](https://github.com/spredfast/react-transform-render-visualizer)**;
-* etc.
-
-The limit is your imagination and the time you feel compelled to spend on writing these transforms.  
-Time will show whether it is an amazing, or a terrible idea.
 
 [![react-transform channel on slack](https://img.shields.io/badge/slack-react--transform%40reactiflux-61DAFB.svg?style=flat-square)](http://www.reactiflux.com)
 
-## Demo
+:rocket: **Now  with [Babel 6](https://github.com/babel/babel) support** (thank you [@thejameskyle](https://github.com/thejameskyle)!)
+
+This plugin wraps React components with arbitrary transforms. In other words, **it allows you to instrument React components** in any way—limited only by your imagination.
+
+* [Ecosystem](#ecosystem)
+* [Demo Project](#demo-project)
+* [Installation](#installation)
+* [Writing Transforms](#writing-transforms)
+
+## Ecosystem
+
+For a reference implementation, see [**react-transform-boilerplate**](https://github.com/gaearon/react-transform-boilerplate).
+
+#### Transforms
+
+* [**react-transform-hmr**](https://github.com/gaearon/react-transform-hmr) - enables hot reloading using HMR API
+* [**react-transform-catch-errors**](https://github.com/gaearon/react-transform-catch-errors) - catches errors inside `render()`
+* [**react-transform-debug-inspector**](https://github.com/alexkuz/react-transform-debug-inspector) - renders an inline prop inspector
+* [**react-transform-render-visualizer**](github.com/spredfast/react-transform-render-visualizer) - highlight components when updated
+
+Feeling inspired? Learn [how to write transforms](#writing-transforms) and send a PR!
+
+## Demo Project
 
 Check out **[react-transform-boilerplate](https://github.com/gaearon/react-transform-boilerplate)** for a demo showing a combination of transforms.
 
@@ -30,44 +32,44 @@ Check out **[react-transform-boilerplate](https://github.com/gaearon/react-trans
 
 ## Installation
 
-First, install the plugin:
+This plugin is designed to be used with the Babel 6 ecosystem. These instructions assume you have a working project set up. If you do not have Babel set up in your project, [learn how to integrate](https://babeljs.io/docs/setup/) it with your toolkit before installing this plugin.
 
-```
+##### Using NPM
+
+Install plugin and save in `devDependencies`:
+
+```bash
 npm install --save-dev babel-plugin-react-transform
 ```
 
-Then, install the transforms you’re interested in:
+Install some transforms:
 
-```
+```bash
 npm install --save-dev react-transform-hmr
 npm install --save-dev react-transform-catch-errors
 ```
 
-Then edit your `.babelrc` to include `extra.react-transform`.  
-It must be an object with a `transforms` property being an array of the transforms you want to use:
+##### Configuration
+Add react-transform to the list of plugins in your babel configuration (usually `.babelrc`):
 
 ```js
+
+
 {
-  "stage": 0,
+  "presets": ["react", "es2015"],
   "env": {
     // this plugin will be included only in development mode, e.g.
     // if NODE_ENV (or BABEL_ENV) environment variable is not set
     // or is equal to "development"
     "development": {
       "plugins": [
-        // Include babel-plugin-react-display-name if you’re
-        // using React.createClass() *before* react-transform:
-        // "react-display-name",
-        "react-transform"
-      ],
-      "extra": {
-        // must be an object
-        "react-transform": {
-          // must be an array
+        // must be an array with options object as second item
+        ["react-transform", {
+          // must be an array of objects
           "transforms": [{
             // can be an NPM module name or a local path
             "transform": "react-transform-hmr",
-            // see specific transform's docs for "imports" and "locals" it needs
+            // see transform docs for "imports" and "locals" dependencies
             "imports": ["react"],
             "locals": ["module"]
           }, {
@@ -77,24 +79,24 @@ It must be an object with a `transforms` property being an array of the transfor
           }, {
             // can be an NPM module name or a local path
             "transform": "./src/my-custom-transform"
-          }],
+          }]
           // by default we only look for `React.createClass` (and ES6 classes)
           // but you can tell the plugin to look for different component factories:
           // factoryMethods: ["React.createClass", "createClass"]
-        }
-      }
+        }]
+      ]
     }
   }
 }
 ```
 
-As you can see each transform, apart from the `transform` field where you write it name, also has `imports` and `locals` fields. You should consult the docs of each individual transform to learn which `imports` and `locals` it might need, and how it uses them. You probably already guessed that this is just a way to inject local variables (like `module`) or dependencies (like `react`) into the transforms that need them.
+As you can see, each transform, apart from the `transform` field where you write it name, also has `imports` and `locals` fields. You should consult the docs of each individual transform to learn which `imports` and `locals` it might need, and how it uses them. You probably already guessed that this is just a way to inject local variables (like `module`) or dependencies (like `react`) into the transforms that need them.
 
 Note that when using `React.createClass()` and allowing `babel` to extract the `displayName` property you must ensure that [babel-plugin-react-display-name](https://github.com/babel/babel/tree/development/packages/babel-plugin-react-display-name) is included before `react-transform`. See [this github issue](https://github.com/gaearon/babel-plugin-react-transform/issues/19) for more details.
 
 You may optionally specify an array of strings called `factoryMethods` if you want the plugin to look for components created with a factory method other than `React.createClass`. Note that you don’t have to do anything special to look for ES6 components—`factoryMethods` is only relevant if you use factory methods akin to `React.createClass`.
 
-## Writing a Transform
+## Writing Transforms
 
 It’s not hard to write a custom transform! First, make sure you call your NPM package `react-transform-*` so we have uniform naming across the transforms. The only thing you should export from your transform module is a function.
 
@@ -203,21 +205,7 @@ export default function logAllUpdates(options) {
 }
 ```
 
-Now go ahead and write your own!  
-Don’t forget to tag it with `react-transform` keyword on npm.
-
-## Ecosystem
-
-* **https://github.com/gaearon/react-transform-boilerplate**
-* **https://github.com/gaearon/react-transform-hmr**
-* **https://github.com/gaearon/react-transform-catch-errors**
-* **https://github.com/alexkuz/react-transform-debug-inspector**
-* **https://github.com/spredfast/react-transform-render-visualizer**
-* Feeling inspired? Send a PR!
-
-## Discussion
-
-You can discuss React Transform and related projects in **#react-transform** channel on [Reactiflux](http://reactiflux.com).
+Now go ahead and write your own! Don’t forget to tag it with `react-transform` keyword on npm.
 
 ## Patrons
 
