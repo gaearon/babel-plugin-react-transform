@@ -28,7 +28,7 @@ Feeling inspired? Learn [how to write transforms](#writing-transforms) and send 
 
 Check out **[react-transform-boilerplate](https://github.com/gaearon/react-transform-boilerplate)** for a demo showing a combination of transforms.
 
-![](http://i.imgur.com/AhGY28T.gif)
+![](https://cloud.githubusercontent.com/assets/1539088/11611771/ae1a6bd8-9bac-11e5-9206-42447e0fe064.gif)
 
 ## Installation
 
