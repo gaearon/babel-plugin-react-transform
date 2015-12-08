@@ -68,7 +68,7 @@ export default function({ types: t, template }) {
     }
   `);
 
-  const VISITED_KEY = Symbol();
+  const VISITED_KEY = 'react-transform-' + Date.now();
 
   const componentVisitor = {
     Class(path) {
