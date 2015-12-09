@@ -1,9 +1,3 @@
-# babel-plugin-react-transform
-
-[![react-transform channel on slack](https://img.shields.io/badge/slack-react--transform%40reactiflux-61DAFB.svg?style=flat-square)](http://www.reactiflux.com)
-
-:rocket: **Now  with [Babel 6](https://github.com/babel/babel) support** (thank you [@thejameskyle](https://github.com/thejameskyle)!)
-
 > ### These docs are for a prerelease!
 > 
 > `v2.0.0` is currently in beta, to use the beta version please run:
@@ -13,6 +7,12 @@
 > ```
 > 
 > View the `v1.1` docs [here](https://github.com/gaearon/babel-plugin-react-transform/tree/v1.1.1)
+
+# babel-plugin-react-transform
+
+[![react-transform channel on slack](https://img.shields.io/badge/slack-react--transform%40reactiflux-61DAFB.svg?style=flat-square)](http://www.reactiflux.com)
+
+:rocket: **Now  with [Babel 6](https://github.com/babel/babel) support** (thank you [@thejameskyle](https://github.com/thejameskyle)!)
 
 This plugin wraps React components with arbitrary transforms. In other words, **it allows you to instrument React components** in any way—limited only by your imagination.
 
