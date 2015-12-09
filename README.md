@@ -20,7 +20,7 @@ For a reference implementation, see [**react-transform-boilerplate**](https://gi
 * [**react-transform-hmr**](https://github.com/gaearon/react-transform-hmr) - enables hot reloading using HMR API
 * [**react-transform-catch-errors**](https://github.com/gaearon/react-transform-catch-errors) - catches errors inside `render()`
 * [**react-transform-debug-inspector**](https://github.com/alexkuz/react-transform-debug-inspector) - renders an inline prop inspector
-* [**react-transform-render-visualizer**](github.com/spredfast/react-transform-render-visualizer) - highlight components when updated
+* [**react-transform-render-visualizer**](https://github.com/spredfast/react-transform-render-visualizer) - highlight components when updated
 
 Feeling inspired? Learn [how to write transforms](#writing-transforms) and send a PR!
 
@@ -138,7 +138,7 @@ export default function logAllUpdates() {
 }
 ```
 
-Oh, how do I get `displayName`?  
+Oh, how do I get `displayName`?
 Actually, we give your transformation function a single argument called `options`. Yes, `options`:
 
 ```js
