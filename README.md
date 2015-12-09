@@ -4,6 +4,16 @@
 
 :rocket: **Now  with [Babel 6](https://github.com/babel/babel) support** (thank you [@thejameskyle](https://github.com/thejameskyle)!)
 
+> ### These docs are for a prerelease!
+> 
+> `v2.0.0` is currently in beta, to use the beta version please run:
+> 
+> ```sh
+> $ npm install --save-dev babel-plugin-react-transform@beta
+> ```
+> 
+> View the `v1.1` docs [here](https://github.com/gaearon/babel-plugin-react-transform/tree/v1.1.1)
+
 This plugin wraps React components with arbitrary transforms. In other words, **it allows you to instrument React components** in any way—limited only by your imagination.
 
 * [Ecosystem](#ecosystem)
