@@ -13,8 +13,13 @@ describe('finds React components', () => {
   fs.readdirSync(fixturesDir).map((caseName) => {
     it(`should ${caseName.split('-').join(' ')}`, () => {
       const fixtureDir = path.join(fixturesDir, caseName);
-      const actualPath = path.join(fixtureDir, 'actual.js');
+      let actualPath = path.join(fixtureDir, 'actual.js');
       const actual = transformFileSync(actualPath).code;
+
+      if (path.sep === '\\') {
+        // Specific case of windows, transformFileSync return code with '/'
+        actualPath = actualPath.replace(/\\/g, '/');
+      }
 
       const expected = fs.readFileSync(
         path.join(fixtureDir, 'expected.js')

@@ -252,7 +252,15 @@ export default function({ types: t, template }) {
           ));
         }
 
-        return t.objectProperty(t.identifier(componentId), t.objectExpression(componentProps));
+        let objectKey;
+
+        if (t.isValidIdentifier(componentId)) {
+          objectKey = t.identifier(componentId);
+        } else {
+          objectKey = t.stringLiteral(componentId);
+        }
+
+        return t.objectProperty(objectKey, t.objectExpression(componentProps));
       });
 
       return t.variableDeclaration('const', [
