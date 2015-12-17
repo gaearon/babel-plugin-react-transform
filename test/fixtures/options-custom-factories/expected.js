@@ -1,9 +1,9 @@
 import _transformLib from 'transform-lib';
 const _components = {
-  Foo: {
+  "Foo": {
     displayName: 'Foo'
   },
-  Bar: {
+  "Bar": {
     displayName: 'Bar'
   }
 };
