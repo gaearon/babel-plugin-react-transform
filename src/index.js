@@ -252,7 +252,8 @@ export default function({ types: t, template }) {
           ));
         }
 
-        return t.objectProperty(t.stringLiteral(componentId), t.objectExpression(componentProps));
+				const objectKey = t.isValidIdentifier(componentId) ? t.identifier(componentId) : t.stringLiteral(componentId);
+        return t.objectProperty(objectKey, t.objectExpression(componentProps));
       });
 
       return t.variableDeclaration('const', [

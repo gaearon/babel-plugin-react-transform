@@ -1,7 +1,7 @@
 import _transformTwo from "transform-two";
 import _transformOne from "transform-one";
 const _components = {
-  "Foo": {
+  Foo: {
     displayName: "Foo"
   }
 };

@@ -9,4 +9,3 @@ factory({
 factory({
   'render': function() {}
 });
-

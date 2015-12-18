@@ -2,7 +2,7 @@ import _reactDom from "react-dom";
 import _react from "react";
 import _transformLib from "transform-lib";
 const _components = {
-  "Foo": {
+  Foo: {
     displayName: "Foo"
   }
 };

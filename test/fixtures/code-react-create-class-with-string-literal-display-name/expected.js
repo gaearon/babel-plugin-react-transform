@@ -1,12 +1,12 @@
-import _transformLib from "transform-lib";
+import _transformLib from 'transform-lib';
 const _components = {
-  Foo: {
-    displayName: "Foo"
+  'my-component': {
+    displayName: 'my-component'
   }
 };
 
 const _transformLib2 = _transformLib({
-  filename: "%FIXTURE_PATH%",
+  filename: '%FIXTURE_PATH%',
   components: _components,
   locals: [],
   imports: []
@@ -18,6 +18,6 @@ function _wrapComponent(id) {
   };
 }
 
-const Foo = _wrapComponent("Foo")(class Foo {
-  render() {}
-});
+const MyComponent = _wrapComponent('my-component')(React.createClass({
+  displayName: 'my-component'
+}));
