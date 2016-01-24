@@ -27,6 +27,7 @@
   "scripts": {
     "clean": "rimraf lib",
     "build": "babel src -d lib",
+    "lint": "eslint src/index.js",
     "test": "mocha --compilers js:babel-register",
     "test:watch": "npm run test -- --watch",
     "prepublish": "npm run clean && npm run build"

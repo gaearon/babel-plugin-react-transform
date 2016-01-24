@@ -31,6 +31,60 @@ export default function({ types: t, template }) {
     });
   }
 
+  function isTypescriptEmittedReactLikeClass(node) {
+    if (!t.isFunctionExpression(node)) {
+      return false;
+    }
+
+    const className = getComponentNameFromTypescriptEmittedClass(node);
+    if (!className || !returnsIdentifier(node.body.body, className)) {
+      return false;
+    }
+
+    return node.body.body.filter(functionMember => {
+      return (
+        t.isExpressionStatement(functionMember) &&
+        t.isAssignmentExpression(functionMember.expression)
+      );
+    }).map(member => {
+      return member.expression;
+    }).filter(assignmentExpression => {
+      return (
+        t.isFunctionExpression(assignmentExpression.right) &&
+        t.isMemberExpression(assignmentExpression.left) &&
+        t.isMemberExpression(assignmentExpression.left.object) &&
+        assignmentExpression.left.object.object.name === className &&
+        assignmentExpression.left.object.property.name === "prototype" &&
+        assignmentExpression.left.property.name === "render"
+      );
+    }).length === 1;
+  }
+
+  function getComponentNameFromTypescriptEmittedClass(node) {
+    const firstMember = node.body.body[0];
+    if (t.isFunctionDeclaration(firstMember)) {
+      return firstMember.id.name; 
+    }
+    if (
+      t.isExpressionStatement(firstMember) &&
+      t.isCallExpression(firstMember.expression) &&
+      firstMember.expression.callee.name === "__extends"
+    ) {
+      const secondMember = node.body.body[1];
+      if (t.isFunctionDeclaration(secondMember)) {
+        return secondMember.id.name;
+      }
+    }
+  }
+
+  function returnsIdentifier(functionBody, identifierName) {
+    const last = functionBody[functionBody.length - 1];
+    return (
+      t.isReturnStatement(last) &&
+      last.argument.name === identifierName
+    );
+  }
+
   // `foo({ displayName: 'NAME' });` => 'NAME'
   function getDisplayName(node) {
     const property = find(node.arguments[0].properties, node => node.key.name === 'displayName');
@@ -117,18 +171,32 @@ export default function({ types: t, template }) {
     },
 
     CallExpression(path) {
+      if (path.node[VISITED_KEY]) {
+        return;
+      }
+
+      const isReactFactoryInvocation = matchesPatterns(path.get('callee'), this.factoryMethods);
+      const isReactComponentObject = !isReactFactoryInvocation && isReactLikeComponentObject(path.node.arguments[0]);
+      const isTypescriptEmittedReactClass = !isReactComponentObject && isTypescriptEmittedReactLikeClass(path.node.callee);
+
       if (
-        path.node[VISITED_KEY] ||
-        !matchesPatterns(path.get('callee'), this.factoryMethods) &&
-        !isReactLikeComponentObject(path.node.arguments[0])
+        !isReactFactoryInvocation &&
+        !isReactComponentObject &&
+        !isTypescriptEmittedReactClass
       ) {
         return;
       }
 
       path.node[VISITED_KEY] = true;
 
-      // `foo({ displayName: 'NAME' });` => 'NAME'
-      const componentName = getDisplayName(path.node);
+      let componentName;
+      if (isReactFactoryInvocation || isReactComponentObject ) {
+        // `foo({ displayName: 'NAME' });` => 'NAME'
+        componentName = getDisplayName(path.node);
+      } else {
+        componentName = getComponentNameFromTypescriptEmittedClass(path.node.callee);
+      }
+
       const componentId = componentName || path.scope.generateUid('component');
       const isInFunction = hasParentFunction(path);
 
