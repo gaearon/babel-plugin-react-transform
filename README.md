@@ -216,7 +216,7 @@ Now go ahead and write your own! Don’t forget to tag it with `react-transform`
 
 The work on React Transform, [React Hot Loader](https://github.com/gaearon/react-hot-loader), [Redux](https://github.com/rackt/redux), and related projects was [funded by the community](https://www.patreon.com/reactdx). Meet some of the outstanding companies that made it possible:
 
-* [Webflow](http://webflow.com/)
+* [Webflow](https://github.com/webflow)
 * [Chess iX](http://www.chess-ix.com/)
 
 [See the full list of React Transform patrons.](PATRONS.md)
