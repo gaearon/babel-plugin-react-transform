@@ -31,12 +31,12 @@ export default function({ types: t, template }) {
     });
   }
 
-  function isTypescriptEmittedReactLikeClass(node) {
+  function isTranspiledReactLikeClass(node) {
     if (!t.isFunctionExpression(node)) {
       return false;
     }
 
-    const className = getComponentNameFromTypescriptEmittedClass(node);
+    const className = getComponentNameFromTranspiledClass(node);
     if (!className || !returnsIdentifier(node.body.body, className)) {
       return false;
     }
@@ -60,21 +60,28 @@ export default function({ types: t, template }) {
     }).length === 1;
   }
 
-  function getComponentNameFromTypescriptEmittedClass(node) {
+  function getComponentNameFromTranspiledClass(node) {
     const firstMember = node.body.body[0];
     if (t.isFunctionDeclaration(firstMember)) {
       return firstMember.id.name; 
     }
-    if (
-      t.isExpressionStatement(firstMember) &&
-      t.isCallExpression(firstMember.expression) &&
-      firstMember.expression.callee.name === "__extends"
-    ) {
+    if (isTranspiledClassInheritor(firstMember)) {
       const secondMember = node.body.body[1];
       if (t.isFunctionDeclaration(secondMember)) {
         return secondMember.id.name;
       }
     }
+  }
+
+  function isTranspiledClassInheritor(node) {
+    return (
+      t.isExpressionStatement(node) &&
+      t.isCallExpression(node.expression) &&
+        (
+          node.expression.callee.name === "__extends" || //TypeScript
+          node.expression.callee.name === "extend" //CoffeeScript
+        )
+    );
   }
 
   function returnsIdentifier(functionBody, identifierName) {
@@ -177,12 +184,12 @@ export default function({ types: t, template }) {
 
       const isReactFactoryInvocation = matchesPatterns(path.get('callee'), this.factoryMethods);
       const isReactComponentObject = !isReactFactoryInvocation && isReactLikeComponentObject(path.node.arguments[0]);
-      const isTypescriptEmittedReactClass = !isReactComponentObject && isTypescriptEmittedReactLikeClass(path.node.callee);
+      const isTranspiledReactClass = !isReactComponentObject && isTranspiledReactLikeClass(path.node.callee);
 
       if (
         !isReactFactoryInvocation &&
         !isReactComponentObject &&
-        !isTypescriptEmittedReactClass
+        !isTranspiledReactClass
       ) {
         return;
       }
@@ -194,7 +201,7 @@ export default function({ types: t, template }) {
         // `foo({ displayName: 'NAME' });` => 'NAME'
         componentName = getDisplayName(path.node);
       } else {
-        componentName = getComponentNameFromTypescriptEmittedClass(path.node.callee);
+        componentName = getComponentNameFromTranspiledClass(path.node.callee);
       }
 
       const componentId = componentName || path.scope.generateUid('component');
