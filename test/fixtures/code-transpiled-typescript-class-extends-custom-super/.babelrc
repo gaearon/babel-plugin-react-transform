@@ -1,0 +1,10 @@
+{
+  "plugins": [
+    ["../../../src", {
+      "superClasses": ["Component", "CustomComponent"],
+      "transforms": [{
+        "transform": "transform-lib"
+      }]
+    }]
+  ]
+}

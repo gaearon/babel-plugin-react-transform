@@ -31,21 +31,65 @@ export default function({ types: t, template }) {
     });
   }
 
-  function isTranspiledReactLikeClass(node) {
-    if (!t.isFunctionExpression(node)) {
+  function identifyTranspiledReactLikeClass(callExpression, knownSuperClasses) {
+    if (!t.isFunctionExpression(callExpression.callee)) {
+      return;
+    }
+
+    const functionMembers = callExpression.callee.body.body;
+    const hasSuperCall = isTranspiledClassInheritor(functionMembers[0]);
+    const className = getComponentNameFromTranspiledClass(functionMembers, hasSuperCall);
+    if (!className || !returnsIdentifier(functionMembers, className)) {
+      return;
+    }
+
+    if (
+      (hasSuperCall && argumentIsKnownSuperClass(callExpression.arguments, knownSuperClasses)) ||
+      transpiledClassHasRenderMethod(functionMembers, className)
+    ) {
+      return className;
+    }
+  }
+
+  function isTranspiledClassInheritor(statement) {
+    return (
+      t.isExpressionStatement(statement) &&
+      t.isCallExpression(statement.expression) &&
+        (
+          statement.expression.callee.name === "__extends" || //TypeScript
+          statement.expression.callee.name === "extend" //CoffeeScript
+        )
+    );
+  }
+
+  function getComponentNameFromTranspiledClass(functionMembers, hasSuperCall) {
+    const expectedConstructorPosition = hasSuperCall ? 1 : 0;
+    const constructor = functionMembers[expectedConstructorPosition];
+    if (t.isFunctionDeclaration(constructor)) {
+      return constructor.id.name;
+    }
+  }
+
+  function returnsIdentifier(functionMembers, identifierName) {
+    const last = functionMembers[functionMembers.length - 1];
+    return (
+      t.isReturnStatement(last) &&
+      last.argument.name === identifierName
+    );
+  }
+
+  function argumentIsKnownSuperClass(callExpressionArguments, knownSuperClasses) {
+    if (callExpressionArguments.length !== 1) {
       return false;
     }
 
-    const className = getComponentNameFromTranspiledClass(node);
-    if (!className || !returnsIdentifier(node.body.body, className)) {
-      return false;
-    }
+    const superClassName = callExpressionArguments[0].name;
+    return !!find(knownSuperClasses, sup => sup === superClassName);
+  }
 
-    return node.body.body.filter(functionMember => {
-      return (
-        t.isExpressionStatement(functionMember) &&
-        t.isAssignmentExpression(functionMember.expression)
-      );
+  function transpiledClassHasRenderMethod(functionMembers, className) {
+    return functionMembers.filter(member => {
+      return t.isAssignmentExpression(member.expression);
     }).map(member => {
       return member.expression;
     }).filter(assignmentExpression => {
@@ -58,38 +102,6 @@ export default function({ types: t, template }) {
         assignmentExpression.left.property.name === "render"
       );
     }).length === 1;
-  }
-
-  function getComponentNameFromTranspiledClass(node) {
-    const firstMember = node.body.body[0];
-    if (t.isFunctionDeclaration(firstMember)) {
-      return firstMember.id.name; 
-    }
-    if (isTranspiledClassInheritor(firstMember)) {
-      const secondMember = node.body.body[1];
-      if (t.isFunctionDeclaration(secondMember)) {
-        return secondMember.id.name;
-      }
-    }
-  }
-
-  function isTranspiledClassInheritor(node) {
-    return (
-      t.isExpressionStatement(node) &&
-      t.isCallExpression(node.expression) &&
-        (
-          node.expression.callee.name === "__extends" || //TypeScript
-          node.expression.callee.name === "extend" //CoffeeScript
-        )
-    );
-  }
-
-  function returnsIdentifier(functionBody, identifierName) {
-    const last = functionBody[functionBody.length - 1];
-    return (
-      t.isReturnStatement(last) &&
-      last.argument.name === identifierName
-    );
   }
 
   // `foo({ displayName: 'NAME' });` => 'NAME'
@@ -184,12 +196,12 @@ export default function({ types: t, template }) {
 
       const isReactFactoryInvocation = matchesPatterns(path.get('callee'), this.factoryMethods);
       const isReactComponentObject = !isReactFactoryInvocation && isReactLikeComponentObject(path.node.arguments[0]);
-      const isTranspiledReactClass = !isReactComponentObject && isTranspiledReactLikeClass(path.node.callee);
+      const transpiledReactClassName = !isReactComponentObject && identifyTranspiledReactLikeClass(path.node, this.superClasses);
 
       if (
         !isReactFactoryInvocation &&
         !isReactComponentObject &&
-        !isTranspiledReactClass
+        !transpiledReactClassName
       ) {
         return;
       }
@@ -201,7 +213,7 @@ export default function({ types: t, template }) {
         // `foo({ displayName: 'NAME' });` => 'NAME'
         componentName = getDisplayName(path.node);
       } else {
-        componentName = getComponentNameFromTranspiledClass(path.node.callee);
+        componentName = transpiledReactClassName;
       }
 
       const componentId = componentName || path.scope.generateUid('component');
