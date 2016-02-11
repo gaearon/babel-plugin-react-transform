@@ -18,7 +18,9 @@ This plugin wraps React components with arbitrary transforms. In other words, **
 
 ## Ecosystem
 
-For a reference implementation, see [**react-transform-boilerplate**](https://github.com/gaearon/react-transform-boilerplate).
+For a reference implementation, see [**react-transform-boilerplate**](https://github.com/gaearon/react-transform-boilerplate).  
+For a starter kit to help write your own transforms, see [**react-transform-noop**](https://github.com/pwmckenna/react-transform-noop).
+
 
 #### Transforms
 
