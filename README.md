@@ -26,6 +26,7 @@ For a reference implementation, see [**react-transform-boilerplate**](https://gi
 * [**react-transform-catch-errors**](https://github.com/gaearon/react-transform-catch-errors) - catches errors inside `render()`
 * [**react-transform-debug-inspector**](https://github.com/alexkuz/react-transform-debug-inspector) - renders an inline prop inspector
 * [**react-transform-render-visualizer**](https://github.com/spredfast/react-transform-render-visualizer) - highlight components when updated
+* [**react-transform-style**](https://github.com/pwmckenna/react-transform-style) - support `style` and `className` styling for all components
 
 Feeling inspired? Learn [how to write transforms](#writing-transforms) and send a PR!
 
