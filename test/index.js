@@ -8,24 +8,30 @@ function trim(str) {
   return str.replace(/^\s+|\s+$/, '');
 }
 
-describe('finds React components', () => {
+describe('Fixtures', () => {
   const fixturesDir = path.join(__dirname, 'fixtures');
   fs.readdirSync(fixturesDir).map((caseName) => {
-    it(`should ${caseName.split('-').join(' ')}`, () => {
+    describe(caseName, () => {
       const fixtureDir = path.join(fixturesDir, caseName);
       let actualPath = path.join(fixtureDir, 'actual.js');
-      const actual = transformFileSync(actualPath).code;
+      const { ast, code } = transformFileSync(actualPath);
 
-      if (path.sep === '\\') {
-        // Specific case of windows, transformFileSync return code with '/'
-        actualPath = actualPath.replace(/\\/g, '/');
-      }
+      const should = ast.comments.length
+        ? ast.comments.map(({ value }) => trim(value)).join(" ")
+        : `should ${caseName.split('-').join(' ')}`;
 
-      const expected = fs.readFileSync(
-        path.join(fixtureDir, 'expected.js')
-      ).toString().replace(/%FIXTURE_PATH%/g, actualPath);
+      it(should, () => {
+        if (path.sep === '\\') {
+          // Specific case of windows, transformFileSync return code with '/'
+          actualPath = actualPath.replace(/\\/g, '/');
+        }
 
-      assert.equal(trim(actual), trim(expected));
+        const expected = fs.readFileSync(
+          path.join(fixtureDir, 'expected.js')
+        ).toString().replace(/%FIXTURE_PATH%/g, actualPath);
+
+        assert.equal(trim(code), trim(expected));
+      });
     });
   });
 });
