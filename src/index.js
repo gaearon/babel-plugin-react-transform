@@ -1,7 +1,38 @@
 import find from 'array-find';
 
 export default function({ types: t, template }) {
-  const functionalParamToVariable = (param, i) => {
+  function findFunctionalIDAndDeclaration(path) {
+    const { declaration } = path.node;
+
+    // Recognize `function Component() { ... }`
+    if (t.isFunctionDeclaration(declaration)) {
+      return {
+        id: declaration.id,
+        declaration
+      };
+    }
+
+    // Recognize `const Component = function() { ... }`
+    if (
+      t.isVariableDeclaration(declaration) &&
+      declaration.kind === "const" &&
+      declaration.declarations.length === 1
+    ) {
+      const variable = declaration.declarations[0];
+
+      return {
+        id: variable.id,
+        declaration: variable.init
+      };
+    }
+
+    return {
+      id: undefined,
+      declaration: undefined
+    };
+  }
+
+  function functionalParamToVariable(param, i) {
     if (t.isIdentifier(param)) {
       const { name } = param;
 
@@ -36,7 +67,7 @@ export default function({ types: t, template }) {
         ]
       );
     }
-  };
+  }
 
   function functionalToClass(id, declaration) {
     // Use first options.superClass as extension point
@@ -111,12 +142,25 @@ export default function({ types: t, template }) {
   }
 
   function isReactLikeFunction(node) {
-    return !!find(node.body.body, statement => {
-      return (
-        t.isReturnStatement(statement) &&
-        t.isJSXElement(statement.argument)
-      );
-    });
+    // Support `{ ... } ` that returns JSX
+    if (t.isBlockStatement(node.body)) {
+      return !!find(node.body.body, statement => {
+        return (
+          t.isReturnStatement(statement) &&
+          t.isJSXElement(statement.argument)
+        );
+      });
+    }
+
+    // Support Arrow Expressions without { ... }
+    if (
+      t.isArrowFunctionExpression(node) &&
+      t.isJSXElement(node.body)
+    ) {
+      return true;
+    }
+
+    return false;
   }
 
   function isReactLikeID(id) {
@@ -255,6 +299,26 @@ export default function({ types: t, template }) {
 
       path.replaceWith(Component);
       path.insertAfter(t.exportDefaultDeclaration(id));
+    },
+
+    ExportNamedDeclaration(path) {
+      const { id, declaration } = findFunctionalIDAndDeclaration(path);
+
+      if (
+        !id ||
+        !declaration ||
+        path.node[VISITED_KEY] ||
+        !isReactLikeID(id) ||
+        !isReactLikeFunction(declaration)
+      ) {
+        return;
+      }
+
+      path.node[VISITED_KEY] = true;
+
+      const Component = functionalToClass.bind(this)(id, declaration);
+
+      path.replaceWith(Component);
     }
   };
 

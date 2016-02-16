@@ -1,0 +1,10 @@
+{
+  "comments": false,
+  "plugins": [
+    ["../../../src", {
+      "transforms": [{
+        "transform": "transform-lib"
+      }]
+    }]
+  ]
+}
