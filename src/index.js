@@ -1,6 +1,85 @@
 import find from 'array-find';
 
 export default function({ types: t, template }) {
+  const functionalParamToVariable = (param, i) => {
+    if (t.isIdentifier(param)) {
+      const { name } = param;
+
+      // `(props, context) => {...}` becomes:
+      //   - `const props = this.props`
+      //   - `const context = this.context`
+      return t.variableDeclaration(
+        "const",
+        [
+          t.variableDeclarator(
+            t.identifier(name),
+            t.memberExpression(t.thisExpression(), t.identifier(name))
+          )
+        ]
+      );
+    }
+
+    // `({ children }, { router }) => {...}` becomes
+    //   0. `const { children } = this.props`
+    //   1. `const { router } = this.context`
+    if (t.isObjectPattern(param)) {
+      return t.variableDeclaration(
+        "const",
+        [
+          t.variableDeclarator(
+            param,
+            t.memberExpression(
+              t.thisExpression(),
+              t.identifier(i === 0 ? "props" : "context")
+            )
+          )
+        ]
+      );
+    }
+  };
+
+  function functionalToClass(id, declaration) {
+    // Use first options.superClass as extension point
+    const superClass = t.memberExpression(...(
+      this.superClasses[0].split(".").map((name) => t.identifier(name))
+    ));
+
+    // Support both:
+    //   - `function() { return ...; }`
+    //   - `() => ( ... )`;
+    const renderBody = t.isBlockStatement(declaration.body)
+      ? declaration.body.body
+      : [t.returnStatement(declaration.body)];
+
+    // Convert function arguments to explicit variables
+    const variables = declaration.params.map(functionalParamToVariable);
+
+    // render() arguments
+    const args = [];
+
+    const body = t.classBody([
+      t.classMethod(
+        "method",
+        t.identifier("render"),
+        args,
+        t.blockStatement([
+          ...variables,
+          ...renderBody
+        ])
+      )
+    ]);
+
+    // Class decorators
+    const decorators = [];
+
+    return t.classDeclaration(
+      id,
+      superClass,
+      body,
+      decorators
+    );
+  }
+
   function matchesPatterns(path, patterns) {
     return !!find(patterns, pattern => {
       return (
@@ -29,6 +108,19 @@ export default function({ types: t, template }) {
         t.isStringLiteral(objectMember.key, { value: 'render' })
       );
     });
+  }
+
+  function isReactLikeFunction(node) {
+    return !!find(node.body.body, statement => {
+      return (
+        t.isReturnStatement(statement) &&
+        t.isJSXElement(statement.argument)
+      );
+    });
+  }
+
+  function isReactLikeID(id) {
+    return id && id.name.match(/^[A-Z]\w+$/);
   }
 
   // `foo({ displayName: 'NAME' });` => 'NAME'
@@ -144,6 +236,28 @@ export default function({ types: t, template }) {
     }
   };
 
+  const functionalVisitor = {
+    ExportDefaultDeclaration(path) {
+      const { declaration } = path.node;
+      const { id } = declaration;
+
+      if (
+        path.node[VISITED_KEY] ||
+        !isReactLikeID(id) ||
+        !isReactLikeFunction(declaration)
+      ) {
+        return;
+      }
+
+      path.node[VISITED_KEY] = true;
+
+      const Component = functionalToClass.bind(this)(id, declaration);
+
+      path.replaceWith(Component);
+      path.insertAfter(t.exportDefaultDeclaration(id));
+    }
+  };
+
   class ReactTransformBuilder {
     constructor(file, options) {
       this.file = file;
@@ -185,6 +299,8 @@ export default function({ types: t, template }) {
     build() {
       const componentsDeclarationId = this.file.scope.generateUidIdentifier('components');
       const wrapperFunctionId = this.file.scope.generateUidIdentifier('wrapComponent');
+
+      this.transformFunctionalComponents();
 
       const components = this.collectAndWrapComponents(wrapperFunctionId);
 
@@ -332,6 +448,16 @@ export default function({ types: t, template }) {
         ID_PARAM: idParam,
         COMPONENT_PARAM: componentParam,
         EXPRESSION: expression
+      });
+    }
+
+    /**
+     * Convert pure, stateless functional components
+     * into React.Components to be wrapped.
+     */
+    transformFunctionalComponents() {
+      this.file.path.traverse(functionalVisitor, {
+        superClasses: this.options.superClasses
       });
     }
   }
