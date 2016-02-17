@@ -44,7 +44,7 @@ export default function({ types: t, template }) {
         [
           t.variableDeclarator(
             t.identifier(name),
-            t.memberExpression(t.thisExpression(), t.identifier(name))
+            t.memberExpression(t.thisExpression(), t.identifier(i === 0 ? "props" : "context"))
           )
         ]
       );
