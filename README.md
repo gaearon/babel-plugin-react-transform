@@ -108,6 +108,46 @@ Note that when using `React.createClass()` and allowing `babel` to extract the `
 
 You may optionally specify an array of strings called `factoryMethods` if you want the plugin to look for components created with a factory method other than `React.createClass`. Note that you don’t have to do anything special to look for ES6 components—`factoryMethods` is only relevant if you use factory methods akin to `React.createClass`.
 
+### Stateless Functional Components
+
+If you enable transforming
+[stateless functional components](https://facebook.github.io/react/blog/2015/10/07/react-v0.14.html#stateless-functional-components)
+into `React.Component` classes via:
+
+```json
+"transformReactLikeFunctionsToClasses": true`
+```
+
+The preferred, most reliable format looks like:
+
+```js
+const Greeting = ({ name }) => (
+  <h1>Howdy there, {name}!</h1>
+);
+
+export default Greeting;
+```
+
+Or, if you prefer a single statement, like this:
+
+```js
+export default function Greeting({ name }) {
+  return (
+    <h1>Howdy there, {name}!</h1>
+  );
+}
+```
+
+This satisfies the **React-like _signatures_** to infer this is
+indeed a React component:
+
+- [x] `const` or `export`ed function.
+- [x] Capitalized function/variable name.
+- [x] Function body `return`s JSX.
+
+As long as these conventions are followed, these functional components
+should be successfully converted into classes for further transformation.
+
 ## Writing Transforms
 
 It’s not hard to write a custom transform! First, make sure you call your NPM package `react-transform-*` so we have uniform naming across the transforms. The only thing you should export from your transform module is a function.
