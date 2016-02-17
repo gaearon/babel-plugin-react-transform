@@ -14,6 +14,7 @@ This plugin wraps React components with arbitrary transforms. In other words, **
 * [Ecosystem](#ecosystem)
 * [Demo Project](#demo-project)
 * [Installation](#installation)
+* [Configuration](#configuration)
 * [Writing Transforms](#writing-transforms)
 
 ## Ecosystem
@@ -54,7 +55,7 @@ npm install --save-dev react-transform-hmr
 npm install --save-dev react-transform-catch-errors
 ```
 
-##### Configuration
+## Configuration
 Add react-transform to the list of plugins in your babel configuration (usually `.babelrc`):
 
 ```js
