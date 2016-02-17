@@ -10,24 +10,29 @@ export default function({ types: t, template }) {
       };
     }
 
-    // Recognize `const Component = function() { ... }`
+    // Recognize:
+    //   - `const Component = function() { ... }`
+    //   - `const Component = () => { ... }`
+    //   - `const Component = () => ( ... )`
     if (
       t.isVariableDeclaration(declaration) &&
       declaration.kind === "const" &&
       declaration.declarations.length === 1
     ) {
-      const variable = declaration.declarations[0];
+      const { id, init } = declaration.declarations[0];
 
-      return {
-        id: variable.id,
-        declaration: variable.init
-      };
+      if (
+        t.isIdentifier(id) &&
+        (t.isArrowFunctionExpression(init) || t.isFunctionExpression(init))
+      ) {
+        return {
+          id,
+          declaration: init
+        };
+      }
     }
 
-    return {
-      id: undefined,
-      declaration: undefined
-    };
+    return {};
   }
 
   function functionalParamToVariable(param, i) {
