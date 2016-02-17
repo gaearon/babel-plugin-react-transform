@@ -1,9 +1,7 @@
 import find from 'array-find';
 
 export default function({ types: t, template }) {
-  function findFunctionalIDAndDeclaration(path) {
-    const { declaration } = path.node;
-
+  function findFunctionalIDAndDeclaration(declaration) {
     // Recognize `function Component() { ... }`
     if (t.isFunctionDeclaration(declaration)) {
       return {
@@ -282,8 +280,7 @@ export default function({ types: t, template }) {
 
   const functionalVisitor = {
     ExportDefaultDeclaration(path) {
-      const { declaration } = path.node;
-      const { id } = declaration;
+      const { id, declaration } = findFunctionalIDAndDeclaration(path.node.declaration);
 
       if (
         path.node[VISITED_KEY] ||
@@ -302,7 +299,57 @@ export default function({ types: t, template }) {
     },
 
     ExportNamedDeclaration(path) {
-      const { id, declaration } = findFunctionalIDAndDeclaration(path);
+      const { id, declaration } = findFunctionalIDAndDeclaration(path.node.declaration);
+
+      if (
+        !id ||
+        !declaration ||
+        path.node[VISITED_KEY] ||
+        !isReactLikeID(id) ||
+        !isReactLikeFunction(declaration)
+      ) {
+        return;
+      }
+
+      path.node[VISITED_KEY] = true;
+
+      const Component = functionalToClass.bind(this)(id, declaration);
+
+      path.replaceWith(Component);
+    },
+
+    FunctionDeclaration(path) {
+      // Only recognize top-level functional components
+      if (!t.isProgram(path.parentPath)) {
+        return;
+      }
+
+      const { id, declaration } = findFunctionalIDAndDeclaration(path.node);
+
+      if (
+        !id ||
+        !declaration ||
+        path.node[VISITED_KEY] ||
+        !isReactLikeID(id) ||
+        !isReactLikeFunction(declaration)
+      ) {
+        return;
+      }
+
+      path.node[VISITED_KEY] = true;
+
+      const Component = functionalToClass.bind(this)(id, declaration);
+
+      path.replaceWith(Component);
+    },
+
+    VariableDeclaration(path) {
+      // Only recognize top-level function assignments
+      if (!t.isProgram(path.parentPath)) {
+        return;
+      }
+
+      const { id, declaration } = findFunctionalIDAndDeclaration(path.node);
 
       if (
         !id ||
