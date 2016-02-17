@@ -84,10 +84,16 @@ Add react-transform to the list of plugins in your babel configuration (usually 
           }, {
             // can be an NPM module name or a local path
             "transform": "./src/my-custom-transform"
-          }]
+          }],
+
           // by default we only look for `React.createClass` (and ES6 classes)
           // but you can tell the plugin to look for different component factories:
-          // factoryMethods: ["React.createClass", "createClass"]
+          // "factoryMethods": ["React.createClass", "createClass"]
+
+          // Disabled by default, if you want to enable transforms
+          // (e.g. HMR) on stateless functional components, this will
+          // convert them into React.Component classes for you.
+          "transformReactLikeFunctionsToClasses": false
         }]
       ]
     }
