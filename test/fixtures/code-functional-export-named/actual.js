@@ -1,4 +1,4 @@
-// should convert named Function to Class
+// should transform named Function to Class
 export function Component() {
   return <p>Success!</p>;
 }

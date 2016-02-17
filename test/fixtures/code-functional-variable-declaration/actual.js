@@ -1,3 +1,4 @@
+// should transform internal root-level variables to Classes
 const Component = (props) => {
   const { children } = props;
 
