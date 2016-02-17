@@ -297,7 +297,7 @@ export default function({ types: t, template }) {
       const Component = functionalToClass.bind(this)(id, declaration);
 
       path.replaceWith(Component);
-      path.insertAfter(t.exportDefaultDeclaration(id));
+      path.insertAfter(t.exportDefaultDeclaration(Component.id));
     },
 
     ExportNamedDeclaration(path) {
