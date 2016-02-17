@@ -430,7 +430,9 @@ export default function({ types: t, template }) {
       const componentsDeclarationId = this.file.scope.generateUidIdentifier('components');
       const wrapperFunctionId = this.file.scope.generateUidIdentifier('wrapComponent');
 
-      this.transformFunctionalComponents();
+      if (this.options.transformReactLikeFunctionsToClasses) {
+        this.transformFunctionalComponents();
+      }
 
       const components = this.collectAndWrapComponents(wrapperFunctionId);
 
