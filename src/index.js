@@ -419,7 +419,10 @@ export default function({ types: t, template }) {
             locals: opts.locals || [],
             imports: opts.imports || []
           };
-        })
+        }),
+        transformReactLikeFunctionsToClasses: typeof options.transformReactLikeFunctionsToClasses !== "undefined"
+          ? options.transformReactLikeFunctionsToClasses
+          : false
       };
     }
 
