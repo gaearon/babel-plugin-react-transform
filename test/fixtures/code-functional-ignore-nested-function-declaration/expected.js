@@ -18,6 +18,8 @@ function _wrapComponent(id) {
   };
 }
 
+import React from "react";
+
 const App = _wrapComponent("App")(class App extends React.Component {
   render() {
     function Component() {

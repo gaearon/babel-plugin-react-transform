@@ -68,6 +68,14 @@ export default function({ types: t, template }) {
   }
 
   function functionalToClass(id, declaration) {
+    // Insert React into scope if it hasn't been imported yet
+    if (!this.file.scope.references.React) {
+      this.file.path.node.body.unshift(t.importDeclaration(
+        [t.importDefaultSpecifier(t.identifier("React"))],
+        t.stringLiteral("react")
+      ));
+    }
+
     // Functional components explicitly extend React.Component
     const superClass = t.memberExpression(
       t.identifier("React"),
@@ -571,6 +579,7 @@ export default function({ types: t, template }) {
      */
     transformFunctionalComponents() {
       this.file.path.traverse(functionalVisitor, {
+        file: this.file,
         superClasses: this.options.superClasses
       });
     }
