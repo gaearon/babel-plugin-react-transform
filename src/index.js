@@ -68,10 +68,11 @@ export default function({ types: t, template }) {
   }
 
   function functionalToClass(id, declaration) {
-    // Use first options.superClass as extension point
-    const superClass = t.memberExpression(...(
-      this.superClasses[0].split(".").map((name) => t.identifier(name))
-    ));
+    // Functional components explicitly extend React.Component
+    const superClass = t.memberExpression(
+      t.identifier("React"),
+      t.identifier("Component")
+    );
 
     // Support both:
     //   - `function() { return ...; }`
