@@ -283,6 +283,8 @@ export default function({ types: t, template }) {
       const { id, declaration } = findFunctionalIDAndDeclaration(path.node.declaration);
 
       if (
+        !id ||
+        !declaration ||
         path.node[VISITED_KEY] ||
         !isReactLikeID(id) ||
         !isReactLikeFunction(declaration)

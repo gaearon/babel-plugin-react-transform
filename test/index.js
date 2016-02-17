@@ -11,6 +11,10 @@ function trim(str) {
 describe('Fixtures', () => {
   const fixturesDir = path.join(__dirname, 'fixtures');
   fs.readdirSync(fixturesDir).map((caseName) => {
+    if (caseName !== "code-functional-ignore-unnamed") {
+      return;
+    }
+
     describe(caseName, () => {
       const fixtureDir = path.join(fixturesDir, caseName);
       let actualPath = path.join(fixtureDir, 'actual.js');
