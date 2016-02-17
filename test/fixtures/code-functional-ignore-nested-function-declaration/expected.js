@@ -6,7 +6,7 @@ const _components = {
 };
 
 const _transformLib2 = _transformLib({
-  filename: "/Users/Eric/Projects/ericclemmons/babel-plugin-react-transform/test/fixtures/code-functional-ignore-nested-function-declaration/actual.js",
+  filename: "%FIXTURE_PATH%",
   components: _components,
   locals: [],
   imports: []
