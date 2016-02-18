@@ -1,2 +1,2 @@
-class Foo extends Component {}
+class Foo extends BooComponent {}
 class Bar extends CustomComponent {}
