@@ -1,7 +1,7 @@
 {
   "plugins": [
     ["../../../src", {
-      "superClasses": ["BooComponent", "CustomComponent"],
+      "factoryMethods": ["createClass", "factory"],
       "transforms": [{
         "transform": "transform-lib"
       }]
