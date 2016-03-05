@@ -1,4 +1,4 @@
-import find from 'array-find';
+import find from 'lodash/find';
 
 export default function({ types: t, template }) {
   function matchesPatterns(path, patterns) {

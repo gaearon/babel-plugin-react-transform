@@ -41,6 +41,6 @@
     "components"
   ],
   "dependencies": {
-    "array-find": "^1.0.0"
+    "lodash": "^4.6.1"
   }
 }
