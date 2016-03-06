@@ -1,7 +1,6 @@
 > These docs are for the v2 release using Babel 6, if you are still on Babel 5 then you should use
-> v1.1 instead.
->
-> View the `v1.1` docs [here](https://github.com/gaearon/babel-plugin-react-transform/tree/v1.1.1)
+> v1.1 instead.  
+> View the `v1.1` docs [here](https://github.com/gaearon/babel-plugin-react-transform/tree/v1.1.1).
 
 # babel-plugin-react-transform
 
