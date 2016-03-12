@@ -1,7 +1,8 @@
 import _transformLib from "transform-lib";
 const _components = {
     Foo: {
-        displayName: "Foo"
+        displayName: "Foo",
+        isInFunction: true
     }
 };
 
@@ -18,8 +19,13 @@ function _wrapComponent(id) {
     };
 }
 
-var Foo = _wrapComponent("Foo")(function () {
-    function Foo() {}
-    Foo.prototype.render = function () {};
-    return Foo;
-}());
+function factory() {
+    return _wrapComponent("Foo")(function (_super) {
+        __extends(Foo, _super);
+        function Foo() {
+            _super.apply(this, arguments);
+        }
+        Foo.prototype.render = function () {};
+        return Foo;
+    }(React.Component));
+}

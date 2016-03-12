@@ -30,8 +30,10 @@ Foo = _wrapComponent("Foo")(function (superClass) {
     return Foo.__super__.constructor.apply(this, arguments);
   }
 
+  Foo.prototype.render = function () {};
+
   return Foo;
-}(Component));
+}(My.Custom.Base.Component));
 
 Bar = _wrapComponent("Bar")(function (superClass) {
   extend(Bar, superClass);
@@ -39,6 +41,8 @@ Bar = _wrapComponent("Bar")(function (superClass) {
   function Bar() {
     return Bar.__super__.constructor.apply(this, arguments);
   }
+
+  Bar.prototype.render = function () {};
 
   return Bar;
 }(CustomComponent));

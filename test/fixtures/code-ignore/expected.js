@@ -13,7 +13,7 @@ var Third = function () {
 
 var Fourth = function () {
   function Fourth() {}
-  Fourth.prototype.notrender = function () {};
+  Fourth.prototype.render = function () {};
   return Fourth;
 }();
 
@@ -23,7 +23,7 @@ var Fifth = function (_super) {
     _super.apply(this, arguments);
   }
   return Fifth;
-}(React.NotComponent);
+}(React.Component);
 
 var Sixth;
 
@@ -35,7 +35,7 @@ Sixth = function (superClass) {
   }
 
   return Sixth;
-}(React.NotComponent);
+}(React.Component);
 
 var Seventh = function () {
   return 7;
