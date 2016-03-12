@@ -3,8 +3,8 @@
 The work on React Transform, [React Hot Loader](https://github.com/gaearon/react-hot-loader), [Redux](https://github.com/rackt/redux), and related projects was [funded by the community](https://www.patreon.com/reactdx).  
 Meet some of the outstanding companies and individuals that made it possible:
 
-* [Webflow](https://webflow.com/)
-* [Chess iX](http://www.chess-ix.com/)
+* [Webflow](https://github.com/webflow)
+* [Ximedes](https://www.ximedes.com/)
 * [Herman J. Radtke III](http://hermanradtke.com)
 * [Ken Wheeler](http://kenwheeler.github.io/)
 * [Chung Yen Li](https://www.facebook.com/prototocal.lee)

@@ -1,4 +1,4 @@
-import find from 'array-find';
+import find from 'lodash/find';
 
 export default function({ types: t, template }) {
   function matchesPatterns(path, patterns) {
@@ -147,7 +147,7 @@ export default function({ types: t, template }) {
     Class(path) {
       if (
         path.node[VISITED_KEY] ||
-        !matchesPatterns(path.get('superClass'), this.superClasses) &&
+        !matchesPatterns(path.get('superClass'), this.superClasses) ||
         !isReactLikeClass(path.node)
       ) {
         return;
@@ -195,12 +195,11 @@ export default function({ types: t, template }) {
       }
 
       const isReactFactoryInvocation = matchesPatterns(path.get('callee'), this.factoryMethods);
-      const isReactComponentObject = !isReactFactoryInvocation && isReactLikeComponentObject(path.node.arguments[0]);
+      const isReactComponentObject = isReactFactoryInvocation && isReactLikeComponentObject(path.node.arguments[0]);
       const transpiledReactClassName = !isReactComponentObject && identifyTranspiledReactLikeClass(path.node, this.superClasses);
 
       if (
-        !isReactFactoryInvocation &&
-        !isReactComponentObject &&
+        !(isReactFactoryInvocation && isReactComponentObject) &&
         !transpiledReactClassName
       ) {
         return;
@@ -258,7 +257,7 @@ export default function({ types: t, template }) {
     normalizeOptions(options) {
       return {
         factoryMethods: options.factoryMethods || ['React.createClass'],
-        superClasses: options.superClasses || ['React.Component'],
+        superClasses: options.superClasses || ['React.Component', 'Component'],
         transforms: options.transforms.map(opts => {
           return {
             transform: opts.transform,

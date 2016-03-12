@@ -40,3 +40,13 @@ Sixth = function (superClass) {
 var Seventh = function () {
   return 7;
 }();
+
+const myCreateClass = spec => {
+  return React.createClass(spec);
+};
+
+const spec = {
+  render: function () {}
+};
+
+React.createClass(spec);

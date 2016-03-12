@@ -1,7 +1,6 @@
 > These docs are for the v2 release using Babel 6, if you are still on Babel 5 then you should use
-> v1.1 instead.
->
-> View the `v1.1` docs [here](https://github.com/gaearon/babel-plugin-react-transform/tree/v1.1.1)
+> v1.1 instead.  
+> View the `v1.1` docs [here](https://github.com/gaearon/babel-plugin-react-transform/tree/v1.1.1).
 
 # babel-plugin-react-transform
 
@@ -11,6 +10,16 @@
 
 This plugin wraps React components with arbitrary transforms. In other words, **it allows you to instrument React components** in any way—limited only by your imagination.
 
+## 🚧🚧🚧🚧🚧
+
+This is **highly experimental tech**. If you’re enthusiastic about hot reloading, by all means, give it a try, but don’t bet your project on it. Either of the technologies it relies upon may change drastically or get deprecated any day. You’ve been warned 😉 .
+
+**This technology exists to prototype next-generation React developer experience**. Please don’t use it blindly if you don’t know the underlying technologies well. Otherwise you are likely to get disillusioned with JavaScript tooling.
+
+**No effort went into making this user-friendly yet. The goal is to eventually kill this technology** in favor of less hacky technologies baked into React. These projects are not long term.
+
+## Table of Contents
+
 * [Ecosystem](#ecosystem)
 * [Demo Project](#demo-project)
 * [Installation](#installation)
@@ -18,7 +27,9 @@ This plugin wraps React components with arbitrary transforms. In other words, **
 
 ## Ecosystem
 
-For a reference implementation, see [**react-transform-boilerplate**](https://github.com/gaearon/react-transform-boilerplate).
+For a reference implementation, see [**react-transform-boilerplate**](https://github.com/gaearon/react-transform-boilerplate).  
+For a starter kit to help write your own transforms, see [**react-transform-noop**](https://github.com/pwmckenna/react-transform-noop).
+
 
 #### Transforms
 
@@ -26,6 +37,7 @@ For a reference implementation, see [**react-transform-boilerplate**](https://gi
 * [**react-transform-catch-errors**](https://github.com/gaearon/react-transform-catch-errors) - catches errors inside `render()`
 * [**react-transform-debug-inspector**](https://github.com/alexkuz/react-transform-debug-inspector) - renders an inline prop inspector
 * [**react-transform-render-visualizer**](https://github.com/spredfast/react-transform-render-visualizer) - highlight components when updated
+* [**react-transform-style**](https://github.com/pwmckenna/react-transform-style) - support `style` and `className` styling for all components
 
 Feeling inspired? Learn [how to write transforms](#writing-transforms) and send a PR!
 
@@ -216,8 +228,8 @@ Now go ahead and write your own! Don’t forget to tag it with `react-transform`
 
 The work on React Transform, [React Hot Loader](https://github.com/gaearon/react-hot-loader), [Redux](https://github.com/rackt/redux), and related projects was [funded by the community](https://www.patreon.com/reactdx). Meet some of the outstanding companies that made it possible:
 
-* [Webflow](http://webflow.com/)
-* [Chess iX](http://www.chess-ix.com/)
+* [Webflow](https://github.com/webflow)
+* [Ximedes](https://www.ximedes.com/)
 
 [See the full list of React Transform patrons.](PATRONS.md)
 
