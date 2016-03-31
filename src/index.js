@@ -3,10 +3,11 @@ import find from 'lodash/find';
 export default function({ types: t, template }) {
   function matchesPatterns(path, patterns) {
     return !!find(patterns, pattern => {
-      return (
-        t.isIdentifier(path.node, { name: pattern }) ||
-        path.matchesPattern(pattern)
-      );
+      try {
+				return new RegExp(pattern).test(path.node.name);
+			} catch (e) {
+				return (t.isIdentifier(path.node, { name: pattern }) || path.matchesPattern(pattern));
+			}
     });
   }
 
