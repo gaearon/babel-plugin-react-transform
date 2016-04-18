@@ -31,6 +31,100 @@ export default function({ types: t, template }) {
     });
   }
 
+  function identifyTranspiledReactLikeClass(callExpression, knownSuperClasses) {
+    if (!t.isFunctionExpression(callExpression.callee)) {
+      return;
+    }
+
+    const functionMembers = callExpression.callee.body.body;
+    if (!isTranspiledClassInheritor(functionMembers[0])) {
+      return;
+    }
+
+    const className = getComponentNameFromTranspiledClass(functionMembers);
+    if (
+      className &&
+      returnsIdentifier(functionMembers, className) &&
+      argumentIsKnownSuperClass(callExpression.arguments, knownSuperClasses) &&
+      transpiledClassHasRenderMethod(functionMembers, className)
+    ) {
+      return className;
+    }
+  }
+
+  function isTranspiledClassInheritor(statement) {
+    return (
+      t.isExpressionStatement(statement) &&
+      t.isCallExpression(statement.expression) &&
+        (
+          statement.expression.callee.name === "__extends" || //TypeScript
+          statement.expression.callee.name === "extend" //CoffeeScript
+        )
+    );
+  }
+
+  function getComponentNameFromTranspiledClass(functionMembers) {
+    const constructor = functionMembers[1];
+    if (t.isFunctionDeclaration(constructor)) {
+      return constructor.id.name;
+    }
+  }
+
+  function returnsIdentifier(functionMembers, identifierName) {
+    const last = functionMembers[functionMembers.length - 1];
+    return (
+      t.isReturnStatement(last) &&
+      last.argument.name === identifierName
+    );
+  }
+
+  function argumentIsKnownSuperClass(callExpressionArguments, knownSuperClasses) {
+    if (callExpressionArguments.length !== 1) {
+      return false;
+    }
+
+    const superClass = callExpressionArguments[0];
+
+    // (function(super) { }(Component))
+    if (t.isIdentifier(superClass)) {
+      return !!find(knownSuperClasses, knownSuper => knownSuper === superClass.name);
+    }
+
+    // (function(super) { }(React.Component))
+    // (function(super) { }(My.Namespace.To.Component))
+    if (t.isMemberExpression(superClass)) {
+      const parts = [];
+      let last;
+      let next = superClass;
+
+      do {
+        parts.push(next.property.name);
+        last = next;
+        next = next.object;
+      } while (t.isMemberExpression(next));
+
+      parts.push(last.object.name);
+      const name = parts.reverse().join('.');
+      return !!find(knownSuperClasses, knownSuper => knownSuper === name);
+    }
+    
+    return false;
+  }
+
+  function transpiledClassHasRenderMethod(functionMembers, className) {
+    return functionMembers
+      .filter(member => t.isAssignmentExpression(member.expression))
+      .map(member => member.expression)
+      .filter(assignmentExpression =>
+        t.isFunctionExpression(assignmentExpression.right) &&
+        t.isMemberExpression(assignmentExpression.left) &&
+        t.isMemberExpression(assignmentExpression.left.object) &&
+        assignmentExpression.left.object.object.name === className &&
+        assignmentExpression.left.object.property.name === "prototype" &&
+        assignmentExpression.left.property.name === "render"
+      ).length === 1;
+  }
+
   // `foo({ displayName: 'NAME' });` => 'NAME'
   function getDisplayName(node) {
     const property = find(node.arguments[0].properties, node => node.key.name === 'displayName');
@@ -117,18 +211,27 @@ export default function({ types: t, template }) {
     },
 
     CallExpression(path) {
-      if (
-        path.node[VISITED_KEY] ||
-        !matchesPatterns(path.get('callee'), this.factoryMethods) ||
-        !isReactLikeComponentObject(path.node.arguments[0])
-      ) {
+      if (path.node[VISITED_KEY]) {
+        return;
+      }
+
+      const isReactComponentObject = matchesPatterns(path.get('callee'), this.factoryMethods) && isReactLikeComponentObject(path.node.arguments[0]);
+      const transpiledReactClassName = !isReactComponentObject && identifyTranspiledReactLikeClass(path.node, this.superClasses);
+
+      if (!isReactComponentObject && !transpiledReactClassName) {
         return;
       }
 
       path.node[VISITED_KEY] = true;
 
-      // `foo({ displayName: 'NAME' });` => 'NAME'
-      const componentName = getDisplayName(path.node);
+      let componentName;
+      if (isReactComponentObject) {
+        // `foo({ displayName: 'NAME' });` => 'NAME'
+        componentName = getDisplayName(path.node);
+      } else {
+        componentName = transpiledReactClassName;
+      }
+
       const componentId = componentName || path.scope.generateUid('component');
       const isInFunction = hasParentFunction(path);
 

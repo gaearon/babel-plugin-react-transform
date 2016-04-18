@@ -1,0 +1,10 @@
+{
+  "plugins": [
+    ["../../../src", {
+      "superClasses": ["My.Custom.Base.Component", "CustomComponent"],
+      "transforms": [{
+        "transform": "transform-lib"
+      }]
+    }]
+  ]
+}
