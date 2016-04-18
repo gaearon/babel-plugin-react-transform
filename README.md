@@ -38,6 +38,8 @@ For a starter kit to help write your own transforms, see [**react-transform-noop
 * [**react-transform-debug-inspector**](https://github.com/alexkuz/react-transform-debug-inspector) - renders an inline prop inspector
 * [**react-transform-render-visualizer**](https://github.com/spredfast/react-transform-render-visualizer) - highlight components when updated
 * [**react-transform-style**](https://github.com/pwmckenna/react-transform-style) - support `style` and `className` styling for all components
+* [**react-transform-log-render**](https://github.com/rkit/react-transform-log-render) - log component renders with passed props and state
+* [**react-transform-count-renders**](https://github.com/stipsan/react-transform-count-renders) - counts how many times your components render
 
 Feeling inspired? Learn [how to write transforms](#writing-transforms) and send a PR!
 
