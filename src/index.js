@@ -32,8 +32,17 @@ export default function({ types: t, template }) {
   }
 
   // `foo({ displayName: 'NAME' });` => 'NAME'
+  // only handle the case when spec is an ObjectExpression
   function getDisplayName(node) {
-    const property = find(node.arguments[0].properties, node => node.key.name === 'displayName');
+    const spec = node.arguments[0];
+
+    if (spec.type !== 'ObjectExpression') {
+      return;
+    }
+
+    const property = find(spec.properties, node => (
+      node.type === 'ObjectProperty' && node.key.name === 'displayName'
+    ));
     return property && property.value.value;
   }
 
