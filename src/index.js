@@ -33,7 +33,7 @@ export default function({ types: t, template }) {
 
   // `foo({ displayName: 'NAME' });` => 'NAME'
   function getDisplayName(node) {
-    const property = find(node.arguments[0].properties, node => node.key.name === 'displayName');
+    const property = find(node.arguments[0].properties, node => node.type === 'ObjectProperty' && node.key.name === 'displayName');
     return property && property.value.value;
   }
 
