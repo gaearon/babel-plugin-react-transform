@@ -23,6 +23,7 @@ This is **highly experimental tech**. If you’re enthusiastic about hot reloadi
 * [Ecosystem](#ecosystem)
 * [Demo Project](#demo-project)
 * [Installation](#installation)
+* [Configuration](#configuration)
 * [Writing Transforms](#writing-transforms)
 
 ## Ecosystem
@@ -68,7 +69,7 @@ npm install --save-dev react-transform-hmr
 npm install --save-dev react-transform-catch-errors
 ```
 
-##### Configuration
+## Configuration
 Add react-transform to the list of plugins in your babel configuration (usually `.babelrc`):
 
 ```js
@@ -98,10 +99,16 @@ Add react-transform to the list of plugins in your babel configuration (usually 
           }, {
             // can be an NPM module name or a local path
             "transform": "./src/my-custom-transform"
-          }]
+          }],
+
           // by default we only look for `React.createClass` (and ES6 classes)
           // but you can tell the plugin to look for different component factories:
-          // factoryMethods: ["React.createClass", "createClass"]
+          // "factoryMethods": ["React.createClass", "createClass"]
+
+          // Disabled by default, if you want to enable transforms
+          // (e.g. HMR) on stateless functional components, this will
+          // convert them into React.Component classes for you.
+          "transformReactLikeFunctionsToClasses": false
         }]
       ]
     }
@@ -114,6 +121,46 @@ As you can see, each transform, apart from the `transform` field where you write
 Note that when using `React.createClass()` and allowing `babel` to extract the `displayName` property you must ensure that [babel-plugin-react-display-name](https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-react-display-name) is included before `react-transform`. See [this github issue](https://github.com/gaearon/babel-plugin-react-transform/issues/19) for more details.
 
 You may optionally specify an array of strings called `factoryMethods` if you want the plugin to look for components created with a factory method other than `React.createClass`. Note that you don’t have to do anything special to look for ES6 components—`factoryMethods` is only relevant if you use factory methods akin to `React.createClass`.
+
+### Stateless Functional Components
+
+If you enable transforming
+[stateless functional components](https://facebook.github.io/react/blog/2015/10/07/react-v0.14.html#stateless-functional-components)
+into `React.Component` classes via:
+
+```json
+"transformReactLikeFunctionsToClasses": true`
+```
+
+The preferred, most reliable format looks like:
+
+```js
+const Greeting = ({ name }) => (
+  <h1>Howdy there, {name}!</h1>
+);
+
+export default Greeting;
+```
+
+Or, if you prefer a single statement, like this:
+
+```js
+export default function Greeting({ name }) {
+  return (
+    <h1>Howdy there, {name}!</h1>
+  );
+}
+```
+
+This satisfies the **React-like _signatures_** to infer this is
+indeed a React component:
+
+- [x] `const` or `export`ed function.
+- [x] Capitalized function/variable name.
+- [x] Function body `return`s JSX.
+
+As long as these conventions are followed, these functional components
+should be successfully converted into classes for further transformation.
 
 ## Writing Transforms
 

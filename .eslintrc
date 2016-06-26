@@ -15,6 +15,7 @@
     "semi": 1
   },
   env: {
+    "mocha": true,
     "node": true
   }
 }

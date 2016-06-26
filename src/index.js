@@ -1,6 +1,128 @@
 import find from 'lodash/find';
 
 export default function({ types: t, template }) {
+  function findFunctionalIDAndDeclaration(declaration) {
+    // Recognize `function Component() { ... }`
+    if (t.isFunctionDeclaration(declaration)) {
+      return {
+        id: declaration.id,
+        declaration
+      };
+    }
+
+    // Recognize:
+    //   - `const Component = function() { ... }`
+    //   - `const Component = () => { ... }`
+    //   - `const Component = () => ( ... )`
+    if (
+      t.isVariableDeclaration(declaration) &&
+      declaration.kind === "const" &&
+      declaration.declarations.length === 1
+    ) {
+      const { id, init } = declaration.declarations[0];
+
+      if (
+        t.isIdentifier(id) &&
+        (t.isArrowFunctionExpression(init) || t.isFunctionExpression(init))
+      ) {
+        return {
+          id,
+          declaration: init
+        };
+      }
+    }
+
+    return {};
+  }
+
+  function functionalParamToVariable(param, i) {
+    if (t.isIdentifier(param)) {
+      const { name } = param;
+
+      // `(props, context) => {...}` becomes:
+      //   - `const props = this.props`
+      //   - `const context = this.context`
+      return t.variableDeclaration(
+        "const",
+        [
+          t.variableDeclarator(
+            t.identifier(name),
+            t.memberExpression(t.thisExpression(), t.identifier(i === 0 ? "props" : "context"))
+          )
+        ]
+      );
+    }
+
+    // `({ children }, { router }) => {...}` becomes
+    //   0. `const { children } = this.props`
+    //   1. `const { router } = this.context`
+    if (t.isObjectPattern(param)) {
+      return t.variableDeclaration(
+        "const",
+        [
+          t.variableDeclarator(
+            param,
+            t.memberExpression(
+              t.thisExpression(),
+              t.identifier(i === 0 ? "props" : "context")
+            )
+          )
+        ]
+      );
+    }
+  }
+
+  function functionalToClass(id, declaration) {
+    // Insert React into scope if it hasn't been imported yet
+    if (!this.file.scope.references.React) {
+      this.file.path.node.body.unshift(t.importDeclaration(
+        [t.importDefaultSpecifier(t.identifier("React"))],
+        t.stringLiteral("react")
+      ));
+    }
+
+    // Functional components explicitly extend React.Component
+    const superClass = t.memberExpression(
+      t.identifier("React"),
+      t.identifier("Component")
+    );
+
+    // Support both:
+    //   - `function() { return ...; }`
+    //   - `() => ( ... )`;
+    const renderBody = t.isBlockStatement(declaration.body)
+      ? declaration.body.body
+      : [t.returnStatement(declaration.body)];
+
+    // Convert function arguments to explicit variables
+    const variables = declaration.params.map(functionalParamToVariable);
+
+    // render() arguments
+    const args = [];
+
+    const body = t.classBody([
+      t.classMethod(
+        "method",
+        t.identifier("render"),
+        args,
+        t.blockStatement([
+          ...variables,
+          ...renderBody
+        ])
+      )
+    ]);
+
+    // Class decorators
+    const decorators = [];
+
+    return t.classDeclaration(
+      id,
+      superClass,
+      body,
+      decorators
+    );
+  }
+
   function matchesPatterns(path, patterns) {
     return !!find(patterns, pattern => {
       return (
@@ -29,6 +151,32 @@ export default function({ types: t, template }) {
         t.isStringLiteral(objectMember.key, { value: 'render' })
       );
     });
+  }
+
+  function isReactLikeFunction(node) {
+    // Support `{ ... } ` that returns JSX
+    if (t.isBlockStatement(node.body)) {
+      return !!find(node.body.body, statement => {
+        return (
+          t.isReturnStatement(statement) &&
+          t.isJSXElement(statement.argument)
+        );
+      });
+    }
+
+    // Support Arrow Expressions without { ... }
+    if (
+      t.isArrowFunctionExpression(node) &&
+      t.isJSXElement(node.body)
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  function isReactLikeID(id) {
+    return id && id.name.match(/^[A-Z]\w+$/);
   }
 
   // `foo({ displayName: 'NAME' });` => 'NAME'
@@ -144,6 +292,99 @@ export default function({ types: t, template }) {
     }
   };
 
+  const functionalVisitor = {
+    ExportDefaultDeclaration(path) {
+      const { id, declaration } = findFunctionalIDAndDeclaration(path.node.declaration);
+
+      if (
+        !id ||
+        !declaration ||
+        path.node[VISITED_KEY] ||
+        !isReactLikeID(id) ||
+        !isReactLikeFunction(declaration)
+      ) {
+        return;
+      }
+
+      path.node[VISITED_KEY] = true;
+
+      const Component = functionalToClass.bind(this)(id, declaration);
+
+      path.replaceWith(Component);
+      path.insertAfter(t.exportDefaultDeclaration(Component.id));
+    },
+
+    ExportNamedDeclaration(path) {
+      const { id, declaration } = findFunctionalIDAndDeclaration(path.node.declaration);
+
+      if (
+        !id ||
+        !declaration ||
+        path.node[VISITED_KEY] ||
+        !isReactLikeID(id) ||
+        !isReactLikeFunction(declaration)
+      ) {
+        return;
+      }
+
+      path.node[VISITED_KEY] = true;
+
+      const Component = functionalToClass.bind(this)(id, declaration);
+
+      path.replaceWith(Component);
+    },
+
+    FunctionDeclaration(path) {
+      // Only recognize top-level functional components
+      if (!t.isProgram(path.parentPath)) {
+        return;
+      }
+
+      const { id, declaration } = findFunctionalIDAndDeclaration(path.node);
+
+      if (
+        !id ||
+        !declaration ||
+        path.node[VISITED_KEY] ||
+        !isReactLikeID(id) ||
+        !isReactLikeFunction(declaration)
+      ) {
+        return;
+      }
+
+      path.node[VISITED_KEY] = true;
+
+      const Component = functionalToClass.bind(this)(id, declaration);
+
+      path.replaceWith(Component);
+    },
+
+    VariableDeclaration(path) {
+      // Only recognize top-level function assignments
+      if (!t.isProgram(path.parentPath)) {
+        return;
+      }
+
+      const { id, declaration } = findFunctionalIDAndDeclaration(path.node);
+
+      if (
+        !id ||
+        !declaration ||
+        path.node[VISITED_KEY] ||
+        !isReactLikeID(id) ||
+        !isReactLikeFunction(declaration)
+      ) {
+        return;
+      }
+
+      path.node[VISITED_KEY] = true;
+
+      const Component = functionalToClass.bind(this)(id, declaration);
+
+      path.replaceWith(Component);
+    }
+  };
+
   class ReactTransformBuilder {
     constructor(file, options) {
       this.file = file;
@@ -178,13 +419,20 @@ export default function({ types: t, template }) {
             locals: opts.locals || [],
             imports: opts.imports || []
           };
-        })
+        }),
+        transformReactLikeFunctionsToClasses: typeof options.transformReactLikeFunctionsToClasses !== "undefined"
+          ? options.transformReactLikeFunctionsToClasses
+          : false
       };
     }
 
     build() {
       const componentsDeclarationId = this.file.scope.generateUidIdentifier('components');
       const wrapperFunctionId = this.file.scope.generateUidIdentifier('wrapComponent');
+
+      if (this.options.transformReactLikeFunctionsToClasses) {
+        this.transformFunctionalComponents();
+      }
 
       const components = this.collectAndWrapComponents(wrapperFunctionId);
 
@@ -332,6 +580,17 @@ export default function({ types: t, template }) {
         ID_PARAM: idParam,
         COMPONENT_PARAM: componentParam,
         EXPRESSION: expression
+      });
+    }
+
+    /**
+     * Convert pure, stateless functional components
+     * into React.Components to be wrapped.
+     */
+    transformFunctionalComponents() {
+      this.file.path.traverse(functionalVisitor, {
+        file: this.file,
+        superClasses: this.options.superClasses
       });
     }
   }
