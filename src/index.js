@@ -128,7 +128,8 @@ export default function({ types: t, template }) {
       path.node[VISITED_KEY] = true;
 
       // `foo({ displayName: 'NAME' });` => 'NAME'
-      const componentName = getDisplayName(path.node);
+      const displayName = getDisplayName(path.node);
+      const componentName = displayName ? displayName.replace(/[\.-]/g, '_') : undefined; //Make sure all non-JSON accepted characters are replaced!
       const componentId = componentName || path.scope.generateUid('component');
       const isInFunction = hasParentFunction(path);
 
