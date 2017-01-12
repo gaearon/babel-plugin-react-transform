@@ -8,7 +8,9 @@ const _components = {
 const _transformLib2 = _transformLib({
   filename: "%FIXTURE_PATH%",
   components: _components,
-  locals: [module, exports],
+  locals: [{
+    hot: module.hot
+  }, exports],
   imports: []
 });
 
