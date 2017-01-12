@@ -284,6 +284,12 @@ export default function({ types: t, template }) {
         const transformImportId = this.file.addImport(transformName, 'default', transformName);
 
         const transformLocals = transform.locals.map(local => {
+          // Webpack 2 disallows use of a bare 'module' identifier in ES2015 modules
+          if (local === 'module') {
+            return toObjectExpression({
+              hot: t.memberExpression(t.identifier('module'), t.identifier('hot'))
+            });
+          }
           return t.identifier(local);
         });
 
