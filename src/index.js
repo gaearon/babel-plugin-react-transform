@@ -171,7 +171,7 @@ export default function({ types: t, template }) {
     normalizeOptions(options) {
       return {
         factoryMethods: options.factoryMethods || ['React.createClass'],
-        superClasses: options.superClasses || ['React.Component', 'Component'],
+        superClasses: options.superClasses || ['React.Component', 'React.PureComponent', 'Component', 'PureComponent'],
         transforms: options.transforms.map(opts => {
           return {
             transform: opts.transform,
