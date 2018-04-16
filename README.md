@@ -40,6 +40,7 @@ For a starter kit to help write your own transforms, see [**react-transform-noop
 * [**react-transform-style**](https://github.com/pwmckenna/react-transform-style) - support `style` and `className` styling for all components
 * [**react-transform-log-render**](https://github.com/rkit/react-transform-log-render) - log component renders with passed props and state
 * [**react-transform-count-renders**](https://github.com/stipsan/react-transform-count-renders) - counts how many times your components render
+* [**react-transform-display-names**](https://github.com/nickdeis/react-transform-display-names) - Retains display names even after minification
 
 Feeling inspired? Learn [how to write transforms](#writing-transforms) and send a PR!
 
