@@ -1,12 +1,56 @@
-import find from 'lodash/find';
+/**
+ * Copyright (c) 2004-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * In order to speed things up, we use transform caching. However, the project
+ * codebase moves very fast and cache becomes invalid when some files change.
+ *
+ * CacheKey is used to generate a unique string that can be used as cache key.
+ * The cache key consists of various dependency cache keys that change if the
+ * output of the transform would change.
+ *
+ * Imported from https://github.com/gaearon/babel-plugin-react-transform
+ * https://github.com/gaearon/babel-plugin-react-transform/commit/d7069df5c6f36a07857fd108067dc515b3a795ee
+ *
+ * @format
+ * @noflow
+ */
 
-export default function({ types: t, template }) {
+'use strict';
+
+// temporary workaround, don't mind this package
+/*eslint-disable eslint-comments/no-unlimited-disable*/
+/*eslint-disable*/var _require =
+
+require('@babel/helper-module-imports');const addDefault = _require.addDefault;
+
+function find(obj, func) {
+  let value = undefined;
+
+  if (!(obj instanceof Array)) {
+    obj = Object.values(obj);
+  }
+
+  obj.some((v, i) => {
+    if (func(v)) {
+      value = v;
+      return true;
+    }
+    return false;
+  });
+
+  return value;
+}
+
+module.exports = function (_ref) {let t = _ref.types,template = _ref.template;
   function matchesPatterns(path, patterns) {
     return !!find(patterns, pattern => {
       return (
         t.isIdentifier(path.node, { name: pattern }) ||
-        path.matchesPattern(pattern)
-      );
+        path.matchesPattern(pattern));
+
     });
   }
 
@@ -14,26 +58,31 @@ export default function({ types: t, template }) {
     return !!find(node.body.body, classMember => {
       return (
         t.isClassMethod(classMember) &&
-        t.isIdentifier(classMember.key, { name: 'render' })
-      );
+        t.isIdentifier(classMember.key, { name: 'render' }));
+
     });
   }
 
   function isReactLikeComponentObject(node) {
-    return t.isObjectExpression(node) && !!find(node.properties, objectMember => {
-      return (
-        t.isObjectProperty(objectMember) ||
-        t.isObjectMethod(objectMember)
-      ) && (
-        t.isIdentifier(objectMember.key, { name: 'render' }) ||
-        t.isStringLiteral(objectMember.key, { value: 'render' })
-      );
-    });
+    return (
+      t.isObjectExpression(node) &&
+      !!find(node.properties, objectMember => {
+        return (
+          (t.isObjectProperty(objectMember) ||
+          t.isObjectMethod(objectMember)) && (
+          t.isIdentifier(objectMember.key, { name: 'render' }) ||
+          t.isStringLiteral(objectMember.key, { value: 'render' })));
+
+      }));
+
   }
 
   // `foo({ displayName: 'NAME' });` => 'NAME'
   function getDisplayName(node) {
-    const property = find(node.arguments[0].properties, node => node.key.name === 'displayName');
+    const property = find(
+    node.arguments[0].properties,
+    _node => _node.key.name === 'displayName');
+
     return property && property.value.value;
   }
 
@@ -44,11 +93,9 @@ export default function({ types: t, template }) {
   // wrapperFunction("componentId")(node)
   function wrapComponent(node, componentId, wrapperFunctionId) {
     return t.callExpression(
-      t.callExpression(wrapperFunctionId, [
-        t.stringLiteral(componentId)
-      ]),
-      [node]
-    );
+    t.callExpression(wrapperFunctionId, [t.stringLiteral(componentId)]),
+    [node]);
+
   }
 
   // `{ name: foo }` => Node { type: "ObjectExpression", properties: [...] }
@@ -73,10 +120,10 @@ export default function({ types: t, template }) {
   const componentVisitor = {
     Class(path) {
       if (
-        path.node[VISITED_KEY] ||
-        !matchesPatterns(path.get('superClass'), this.superClasses) ||
-        !isReactLikeClass(path.node)
-      ) {
+      path.node[VISITED_KEY] ||
+      !matchesPatterns(path.get('superClass'), this.superClasses) ||
+      !isReactLikeClass(path.node))
+      {
         return;
       }
 
@@ -89,26 +136,53 @@ export default function({ types: t, template }) {
       this.components.push({
         id: componentId,
         name: componentName,
-        isInFunction: isInFunction
-      });
+        isInFunction: isInFunction });
+
 
       // Can't wrap ClassDeclarations
       const isStatement = t.isStatement(path.node);
+      const isExport = t.isExportDefaultDeclaration(path.parent);
+
+      if (isStatement && !isExport) {
+        // class decl
+        // need to work around Babel 7 detecting duplicate decls here
+
+        path.insertAfter(
+        t.expressionStatement(
+        t.assignmentExpression(
+        '=',
+        t.identifier(componentId),
+        wrapComponent(
+        t.identifier(componentId),
+        componentId,
+        this.wrapperFunctionId))));
+
+
+
+
+
+        return;
+      }
+
       const expression = t.toExpression(path.node);
 
       // wrapperFunction("componentId")(node)
-      let wrapped = wrapComponent(expression, componentId, this.wrapperFunctionId);
+      let wrapped = wrapComponent(
+      expression,
+      componentId,
+      this.wrapperFunctionId);
+
       let constId;
 
       if (isStatement) {
         // wrapperFunction("componentId")(class Foo ...) => const Foo = wrapperFunction("componentId")(class Foo ...)
         constId = t.identifier(componentName || componentId);
         wrapped = t.variableDeclaration('const', [
-          t.variableDeclarator(constId, wrapped)
-        ]);
+        t.variableDeclarator(constId, wrapped)]);
+
       }
 
-      if (t.isExportDefaultDeclaration(path.parent)) {
+      if (isExport) {
         path.parentPath.insertBefore(wrapped);
         path.parent.declaration = constId;
       } else {
@@ -118,10 +192,10 @@ export default function({ types: t, template }) {
 
     CallExpression(path) {
       if (
-        path.node[VISITED_KEY] ||
-        !matchesPatterns(path.get('callee'), this.factoryMethods) ||
-        !isReactLikeComponentObject(path.node.arguments[0])
-      ) {
+      path.node[VISITED_KEY] ||
+      !matchesPatterns(path.get('callee'), this.factoryMethods) ||
+      !isReactLikeComponentObject(path.node.arguments[0]))
+      {
         return;
       }
 
@@ -135,14 +209,14 @@ export default function({ types: t, template }) {
       this.components.push({
         id: componentId,
         name: componentName,
-        isInFunction: isInFunction
-      });
+        isInFunction: isInFunction });
+
 
       path.replaceWith(
-        wrapComponent(path.node, componentId, this.wrapperFunctionId)
-      );
-    }
-  };
+      wrapComponent(path.node, componentId, this.wrapperFunctionId));
+
+    } };
+
 
   class ReactTransformBuilder {
     constructor(file, options) {
@@ -161,30 +235,39 @@ export default function({ types: t, template }) {
     static assertValidOptions(options) {
       if (!ReactTransformBuilder.validateOptions(options)) {
         throw new Error(
-          'babel-plugin-react-transform requires that you specify options ' +
-          'in .babelrc or from the Babel Node API, and that it is an object ' +
-          'with a transforms property which is an array.'
-        );
+        'babel-plugin-react-transform requires that you specify options ' +
+        'in .babelrc or from the Babel Node API, and that it is an object ' +
+        'with a transforms property which is an array.');
+
       }
     }
 
     normalizeOptions(options) {
       return {
         factoryMethods: options.factoryMethods || ['React.createClass'],
-        superClasses: options.superClasses || ['React.Component', 'React.PureComponent', 'Component', 'PureComponent'],
+        superClasses: options.superClasses || [
+        'React.Component',
+        'React.PureComponent',
+        'Component',
+        'PureComponent'],
+
         transforms: options.transforms.map(opts => {
           return {
             transform: opts.transform,
             locals: opts.locals || [],
-            imports: opts.imports || []
-          };
-        })
-      };
+            imports: opts.imports || [] };
+
+        }) };
+
     }
 
-    build() {
-      const componentsDeclarationId = this.file.scope.generateUidIdentifier('components');
-      const wrapperFunctionId = this.file.scope.generateUidIdentifier('wrapComponent');
+    build(path) {
+      const componentsDeclarationId = this.file.scope.generateUidIdentifier(
+      'components');
+
+      const wrapperFunctionId = this.file.scope.generateUidIdentifier(
+      'wrapComponent');
+
 
       const components = this.collectAndWrapComponents(wrapperFunctionId);
 
@@ -192,8 +275,14 @@ export default function({ types: t, template }) {
         return;
       }
 
-      const componentsDeclaration = this.initComponentsDeclaration(componentsDeclarationId, components);
-      const configuredTransforms = this.initTransformers(componentsDeclarationId);
+      const componentsDeclaration = this.initComponentsDeclaration(
+      componentsDeclarationId,
+      components);
+
+      const configuredTransforms = this.initTransformers(
+      path,
+      componentsDeclarationId);
+
       const wrapperFunction = this.initWrapperFunction(wrapperFunctionId);
 
       const body = this.program.node.body;
@@ -204,12 +293,12 @@ export default function({ types: t, template }) {
     }
 
     /**
-     * const Foo = _wrapComponent('Foo')(class Foo extends React.Component {});
-     * ...
-     * const Bar = _wrapComponent('Bar')(React.createClass({
-     *   displayName: 'Bar'
-     * }));
-     */
+       * const Foo = _wrapComponent('Foo')(class Foo extends React.Component {});
+       * ...
+       * const Bar = _wrapComponent('Bar')(React.createClass({
+       *   displayName: 'Bar'
+       * }));
+       */
     collectAndWrapComponents(wrapperFunctionId) {
       const components = [];
 
@@ -218,38 +307,40 @@ export default function({ types: t, template }) {
         components: components,
         factoryMethods: this.options.factoryMethods,
         superClasses: this.options.superClasses,
-        currentlyInFunction: false
-      });
+        currentlyInFunction: false });
+
 
       return components;
     }
 
     /**
-     * const _components = {
-     *   Foo: {
-     *     displayName: "Foo"
-     *   }
-     * };
-     */
+       * const _components = {
+       *   Foo: {
+       *     displayName: "Foo"
+       *   }
+       * };
+       */
     initComponentsDeclaration(componentsDeclarationId, components) {
-      let uniqueId = 0;
-
       const props = components.map(component => {
         const componentId = component.id;
         const componentProps = [];
 
         if (component.name) {
-          componentProps.push(t.objectProperty(
-            t.identifier('displayName'),
-            t.stringLiteral(component.name)
-          ));
+          componentProps.push(
+          t.objectProperty(
+          t.identifier('displayName'),
+          t.stringLiteral(component.name)));
+
+
         }
 
         if (component.isInFunction) {
-          componentProps.push(t.objectProperty(
-            t.identifier('isInFunction'),
-            t.booleanLiteral(true)
-          ));
+          componentProps.push(
+          t.objectProperty(
+          t.identifier('isInFunction'),
+          t.booleanLiteral(true)));
+
+
         }
 
         let objectKey;
@@ -264,47 +355,54 @@ export default function({ types: t, template }) {
       });
 
       return t.variableDeclaration('const', [
-        t.variableDeclarator(componentsDeclarationId, t.objectExpression(props))
-      ]);
+      t.variableDeclarator(
+      componentsDeclarationId,
+      t.objectExpression(props))]);
+
+
     }
 
     /**
-     * import _transformLib from "transform-lib";
-     * ...
-     * const _transformLib2 = _transformLib({
-     *   filename: "filename",
-     *   components: _components,
-     *   locals: [],
-     *   imports: []
-     * });
-     */
-    initTransformers(componentsDeclarationId) {
+       * import _transformLib from "transform-lib";
+       * ...
+       * const _transformLib2 = _transformLib({
+       *   filename: "filename",
+       *   components: _components,
+       *   locals: [],
+       *   imports: []
+       * });
+       */
+    initTransformers(path, componentsDeclarationId) {
       return this.options.transforms.map(transform => {
         const transformName = transform.transform;
-        const transformImportId = this.file.addImport(transformName, 'default', transformName);
+        const transformImportId = addDefault(path, transformName, {
+          nameHint: transformName });
+
 
         const transformLocals = transform.locals.map(local => {
           return t.identifier(local);
         });
 
         const transformImports = transform.imports.map(importName => {
-          return this.file.addImport(importName, 'default', importName);
+          return addDefault(path, importName, { hint: importName });
         });
 
-        const configuredTransformId = this.file.scope.generateUidIdentifier(transformName);
+        const configuredTransformId = this.file.scope.generateUidIdentifier(
+        transformName);
+
         const configuredTransform = t.variableDeclaration('const', [
-          t.variableDeclarator(
-            configuredTransformId,
-            t.callExpression(transformImportId, [
-              toObjectExpression({
-                filename: t.stringLiteral(this.file.opts.filename),
-                components: componentsDeclarationId,
-                locals: t.arrayExpression(transformLocals),
-                imports: t.arrayExpression(transformImports)
-              })
-            ])
-          )
-        ]);
+        t.variableDeclarator(
+        configuredTransformId,
+        t.callExpression(transformImportId, [
+        toObjectExpression({
+          filename: t.stringLiteral(this.file.opts.filename || 'unknown'),
+          components: componentsDeclarationId,
+          locals: t.arrayExpression(transformLocals),
+          imports: t.arrayExpression(transformImports) })]))]);
+
+
+
+
 
         this.configuredTransformsIds.push(configuredTransformId);
 
@@ -313,17 +411,19 @@ export default function({ types: t, template }) {
     }
 
     /**
-     * function _wrapComponent(id) {
-     *   return function (Component) {
-     *     return _transformLib2(Component, id);
-     *   };
-     * }
-     */
+       * function _wrapComponent(id) {
+       *   return function (Component) {
+       *     return _transformLib2(Component, id);
+       *   };
+       * }
+       */
     initWrapperFunction(wrapperFunctionId) {
       const idParam = t.identifier('id');
       const componentParam = t.identifier('Component');
 
-      const expression = this.configuredTransformsIds.reverse().reduce((memo, transformId) => {
+      const expression = this.configuredTransformsIds.
+      reverse().
+      reduce((memo, transformId) => {
         return t.callExpression(transformId, [memo, idParam]);
       }, componentParam);
 
@@ -331,18 +431,18 @@ export default function({ types: t, template }) {
         WRAPPER_FUNCTION_ID: wrapperFunctionId,
         ID_PARAM: idParam,
         COMPONENT_PARAM: componentParam,
-        EXPRESSION: expression
-      });
-    }
-  }
+        EXPRESSION: expression });
+
+    }}
+
 
   return {
     visitor: {
-      Program(path, { file, opts }) {
+      Program(path, _ref2) {let file = _ref2.file,opts = _ref2.opts;
         ReactTransformBuilder.assertValidOptions(opts);
         const builder = new ReactTransformBuilder(file, opts);
-        builder.build();
-      }
-    }
-  };
-}
+        builder.build(path);
+      } } };
+
+
+};
